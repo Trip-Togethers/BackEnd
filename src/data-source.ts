@@ -10,6 +10,7 @@ const AppDataSource = new DataSource({
   database: "trip_together", // DB 이름
   synchronize: true, // 개발 환경에서는 true, 배포 환경에서는 false
   logging: true,
+
   entities: [Schedule], // 엔티티 등록
 });
 

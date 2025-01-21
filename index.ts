@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import mainPageRouter from "./src/routes/schedule"; // src/routes/mainpage.ts
 import dotenv from "dotenv";
 import AppDataSource from "./src/data-source";
 
@@ -35,4 +34,4 @@ AppDataSource.initialize()
 
 // 라우터 설정
 app.use("/trips", mainPageRouter);
-app.use("/uploads", express.static("uploads"));
+app.use('/uploads', express.static('uploads'));
