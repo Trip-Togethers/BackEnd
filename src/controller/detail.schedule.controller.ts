@@ -3,77 +3,74 @@ import { StatusCodes } from "http-status-codes";
 import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
 import { Detaile } from "../entities/detail.schedule.entity";
+import { isSameDay, parseISO } from "date-fns";
 
 // 세부 일정 조회
 export const allDetailTrips = async (req: Request, res: Response) => {
-  const scheduleId = Number(req.params.tripsId);
+  const scheduleId = Number(req.params.tripId);
 
-  try {
-    // TODO: 여행 일정 계산 (17~19일 여행 기간이라면, 17, 18, 19 따로 저장하기)
-    const scheduleRepository = AppDataSource.getRepository(Schedule);
-    const detailSchedule = await scheduleRepository.findOne({
-      select: ["id", "start_date", "end_date"],
-      where: {
-        id: scheduleId,
-      },
-    });
+  // 스케줄 정보 조회
+  const scheduleRepository = AppDataSource.getRepository(Schedule);
+  const schedule = await scheduleRepository.findOne({
+    where: {
+      id: scheduleId,
+    },
+  });
 
-    if (!detailSchedule) {
-      res.status(StatusCodes.NOT_FOUND).json({ message: "Trip not found." });
-      return;
-    }
-
-    const startDate = new Date(detailSchedule.start_date);
-    const endDate = new Date(detailSchedule.end_date);
-
-     // 시작일과 종료일 사이의 날짜 생성
-    const dates = generateDatesBetween(startDate, endDate);
-    const deta_list: string[] = [];
-
-    for (let i = 0; i < dates.length; i++) {
-      const formmat_date = dates[i].toISOString().split("T")[0];
-      deta_list.push(formmat_date);
-    }
-
-    //TODO: 개별 날짜에 저장된 세부 일정 조회 (17, 18, 19일 각각 해당하는 일정 확인)
-    // 각 날짜에 맞는 세부 일정 조회
-    const detailScheduleRepository = AppDataSource.getRepository(Detaile);
-    const detailSchedules = await detailScheduleRepository.find({
-      where: {
-        schedule: detailSchedule
-      }
-    });
-
-    // 날짜별 세부 일정 정리
-    const detailedScheduleByDate: { [key: string]: unknown[] } = {};
-    detailSchedules.forEach((schedule) => {
-      const date_key = schedule.schedule_date.toISOString().split("T")[0];
-      if (!detailedScheduleByDate[date_key]) {
-        detailedScheduleByDate[date_key] = [];
-      }
-      detailedScheduleByDate[date_key].push(schedule);
-    });
-
-    res.status(StatusCodes.OK).json({
-      message: detailSchedule,
-      day: deta_list, // 날짜 목록
-      detailedScheduleByDate, // 날짜별 세부 일정
-    });
-  } catch (error) {
-    console.error("Error details:", error);
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Error fetching schedule." });
+  if (!schedule) {
+    res.status(StatusCodes.NOT_FOUND).json({ message: "Trip not found." });
+    return;
   }
+
+  // 날짜 계산에 필요한 시작일, 종료일 가져오기
+  const startDate = new Date(schedule.start_date);
+  const endDate = new Date(schedule.end_date);
+
+  // 시작일과 종료일 사이의 날짜 생성
+  const dates = generateDatesBetween(startDate, endDate);
+  const detaList: string[] = [];
+
+  for (let i = 0; i < dates.length; i++) {
+    const formmat_date = dates[i].toISOString().split("T")[0];
+    detaList.push(formmat_date);
+  }
+
+  // 세부 일정 조회
+  const detailScheduleRepository = AppDataSource.getRepository(Detaile);
+  const detailedSchedule = await detailScheduleRepository.find({
+    where: {
+      schedule: { id: scheduleId },
+    },
+  });
+
+  const detailDate = detaList.map((currentDate) => {
+    const currentDateObj = parseISO(`${currentDate}T00:00:00`);
+    const matchingDates = detailedSchedule.filter((details) => {
+      const scheduleDate = details.schedule_date;
+      return isSameDay(scheduleDate, currentDateObj);
+    });
+
+    return {
+      scheduleDate: currentDate, // 날짜
+      currentDate:
+        matchingDates.length > 0 ? matchingDates : "No detail available", // 해당 날짜의 상세 일정들
+    };
+  });
+
+  res.status(StatusCodes.OK).json({
+    scheduleDate: detailDate, // 날짜별 세부 일정
+    date: detailedSchedule, // 모든 상세 일정 데이터 반환
+  });
 };
 
 // 세부 일정 추가
-export const addDetailTrips = (req: Request, res: Response) => {
+export const addDetailTrips = async (req: Request, res: Response) => {
   console.log("세부 일정 추가");
   res.status(StatusCodes.OK).json({
     message: "세부 일정 추가",
   });
 };
+
 // 세부 일정 수정
 export const editDetailTrips = (req: Request, res: Response) => {
   console.log("세부 일정 수정");
@@ -81,6 +78,7 @@ export const editDetailTrips = (req: Request, res: Response) => {
     message: "세부 일정 수정",
   });
 };
+
 // 세부 일정 삭제
 export const removeDetailTrips = (req: Request, res: Response) => {
   console.log("세부 일정 삭제");

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -29,5 +30,6 @@ export class Detaile {
   updated_at!: Date;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.details)
+  @JoinColumn({ name: 'schedule_id' })
   schedule!: Schedule;
 }

@@ -14,6 +14,7 @@
   "description": "- `main`과 `develop` 브랜치는 본래 이름 그대로 사용하는 것이 일반적입니다.\r   - **`main`**: 바로 배포가 가능한 브랜치입니다.\r   - **`develop`**: 기능 개발이 이루어지는 브랜치입니다.",
   "dependencies": {
     "@types/uuid": "^10.0.0",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",

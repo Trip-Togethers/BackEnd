@@ -7,7 +7,7 @@ export const insertSchedule = async (
   destination: string,
   start_date: Date,
   end_date: Date,
-  email: string,
+  email: string, // id를 받아와서 저장해도 ok
   photo_url: string
 ) => {
   const scheduleRepository = AppDataSource.getRepository(Schedule);
