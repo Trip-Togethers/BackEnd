@@ -58,6 +58,15 @@ export const addTrips = async (req: Request, res: Response) => {
   await body("endDate")
     .isDate()
     .withMessage("종료일을 올바르게 입력해 주세요")
+    .custom((value, { req }) => {
+      const startDate = new Date(req.body.startDate);
+      const endDate = new Date(value);
+      
+      if (startDate > endDate) {
+        throw new Error("종료일은 시작일보다 늦어야 합니다.");
+      }
+      return true;
+    })
     .run(req);
   await body("destination")
     .notEmpty()
