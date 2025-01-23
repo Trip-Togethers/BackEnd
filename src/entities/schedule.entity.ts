@@ -31,4 +31,7 @@ export class Schedule {
 
   @Column()
   user!: string
+
+  @Column()
+  photo_url!: string
 }

@@ -3,10 +3,26 @@ import { StatusCodes } from "http-status-codes";
 import { insertSchedule } from "../services/schedule.service";
 import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
+import { body, validationResult } from "express-validator";
 
 // 여행 일정 조회
 export const allTrips = async (req: Request, res: Response) => {
-  const {email} = req.body;
+  await body("email")
+    .notEmpty()
+    .withMessage("이메일을 입력해주세요.")
+    .isEmail()
+    .withMessage("유효한 이메일을 입력해 주세요")
+    .run(req);
+  // 유효성 검사 결과 확인
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      errors: errors.array(),
+    });
+    return;
+  }
+
+  const { email } = req.body;
 
   // 이메일에 해당하는 일정 조회
   const scheduleRepository = AppDataSource.getRepository(Schedule);
@@ -14,51 +30,76 @@ export const allTrips = async (req: Request, res: Response) => {
     where: { user: email },
   });
 
-  if (!user) {
-    throw new Error("User not found");
+  if (!user || user.length === 0) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: "User not found",
+    });
+    return;
   }
 
   res.status(StatusCodes.OK).json({
-    schedules: user
+    schedules: user,
   });
 };
 
 // 여행 일정 추가
 export const addTrips = async (req: Request, res: Response) => {
-  // 제목, 목적지, 기간 (시작일, 종료일)
-  const { title, destination, start_date, end_date, email } = req.body;
-  if (!title || !start_date || !end_date || !destination ||!email) {
+  // express-validator로 요청 데이터 검증
+  await body("title")
+    .notEmpty()
+    .withMessage("제목을 입력해 주세요")
+    .isLength({ min: 3, max: 50 })
+    .withMessage("제목은 3자 이상, 50자 이하로 입력해 주세요.")
+    .run(req);
+  await body("startDate")
+    .isDate()
+    .withMessage("시작일을 올바르게 입력해 주세요")
+    .run(req);
+  await body("endDate")
+    .isDate()
+    .withMessage("종료일을 올바르게 입력해 주세요")
+    .run(req);
+  await body("destination")
+    .notEmpty()
+    .withMessage("목적지를 입력해 주세요")
+    .run(req);
+  await body("email")
+    .isEmail()
+    .withMessage("유효한 이메일을 입력해 주세요")
+    .run(req);
+
+  // 유효성 검사 결과 확인
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
     res.status(StatusCodes.BAD_REQUEST).json({
-      message: "제목과 시작일, 종료일을 모두 입력해 주세요",
+      errors: errors.array(),
     });
     return;
-  } else {
-    try {
-      await insertSchedule(
-        title,
-        destination,
-        start_date,
-        end_date,
-        email
-      );
-      res.status(StatusCodes.OK).json({
-        message: "Schedule created successfully",
-      });
-    } catch (error) {
-      // 500 에러
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Error creating user",
-        error,
-      });
-    }
+  }
+
+  // 제목, 목적지, 기간 (시작일, 종료일)
+  const { title, destination, startDate, endDate, email } = req.body;
+  const photoFilePath = handleFileUpload(req);
+  const photoUrl = photoFilePath ? photoFilePath : '';
+  try {
+    await insertSchedule(title, destination, startDate, endDate, email, photoUrl);
+    res.status(StatusCodes.OK).json({
+      message: "Schedule created successfully",
+    });
+  } catch (error) {
+    // 500 에러
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Error creating user",
+      error,
+    });
   }
 };
 
 // 여행 일정 삭제
 export const removeTrips = async (req: Request, res: Response) => {
-  const { trip_id } = req.params;
+  const tripId = Number(req.params.tripId);
 
-  if (!trip_id || isNaN(Number(trip_id))) {
+  if (!tripId || isNaN(tripId)) {
     res.status(StatusCodes.BAD_REQUEST).json({
       message: "삭제할 일정 ID를 올바르게 제공해주세요.",
     });
@@ -69,7 +110,7 @@ export const removeTrips = async (req: Request, res: Response) => {
     const scheduleRepository = AppDataSource.getRepository(Schedule);
     const schedule = await scheduleRepository.findOne({
       where: {
-        id: Number(trip_id),
+        id: tripId,
       },
     });
 
@@ -95,17 +136,13 @@ export const removeTrips = async (req: Request, res: Response) => {
   }
 };
 
-// 이미지 업로드
-export const uploadImage = (req: Request, res: Response): void => {
+// 경로 리턴해주는 함수
+const handleFileUpload = (req: Request): string | null => {
   if (!req.file) {
-    res.status(400).send("No file uploaded.");
-    return;
+    return null;
   }
-  res.status(StatusCodes.OK).json({
-    message: "File uploaded successfully!",
-    filePath: `/uploads/${req.file.filename}`,
-  });
-};
+  return `/uploads/${req.file.filename}`;
+}
 
 // AUTO_INCREMENT 값을 재설정하는 함수
 export const resetScheduleIds = async () => {

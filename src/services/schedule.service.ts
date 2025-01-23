@@ -7,7 +7,8 @@ export const insertSchedule = async (
   destination: string,
   start_date: Date,
   end_date: Date,
-  email: string
+  email: string,
+  photo_url: string
 ) => {
   const scheduleRepository = AppDataSource.getRepository(Schedule);
 
@@ -18,6 +19,7 @@ export const insertSchedule = async (
   newSchedule.start_date = start_date;
   newSchedule.end_date = end_date;
   newSchedule.user = email;
+  newSchedule.photo_url = photo_url;
 
   // 데이터 베이스에 저장
   await scheduleRepository.save(newSchedule);
