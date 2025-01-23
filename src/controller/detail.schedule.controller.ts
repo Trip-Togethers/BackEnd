@@ -9,7 +9,8 @@ import { isSameDay, parseISO } from "date-fns";
 export const allDetailTrips = async (req: Request, res: Response) => {
   const scheduleId = Number(req.params.tripId);
 
-  // 스케줄 정보 조회
+  try {
+    // 스케줄 정보 조회
   const scheduleRepository = AppDataSource.getRepository(Schedule);
   const schedule = await scheduleRepository.findOne({
     where: {
@@ -61,6 +62,12 @@ export const allDetailTrips = async (req: Request, res: Response) => {
     scheduleDate: detailDate, // 날짜별 세부 일정
     date: detailedSchedule, // 모든 상세 일정 데이터 반환
   });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Error creating user",
+      error,
+    });
+  }
 };
 
 // 세부 일정 추가
