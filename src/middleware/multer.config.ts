@@ -4,7 +4,7 @@ import path from "path";
 // Multer 설정
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // 파일을 저장할 디렉토리 설정
+    cb(null, "uploads/"); // 파일을 저장할 디렉토리 설정 
   },
   filename: (req, file, cb) => {
     const unique_suffix  = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;

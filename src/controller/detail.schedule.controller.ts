@@ -3,7 +3,14 @@ import { StatusCodes } from "http-status-codes";
 import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
 import { Detaile } from "../entities/detail.schedule.entity";
-import { isSameDay, parseISO } from "date-fns";
+import { insertDetailSchedule } from "../services/detail.schedul.service";
+import { body } from "express-validator";
+import {
+  convertToUTC,
+  findDetailedSchedules,
+  generateFormattedDates,
+  isDateInRange,
+} from "../utils/detail.schedule.util";
 
 // 세부 일정 조회
 export const allDetailTrips = async (req: Request, res: Response) => {
@@ -11,57 +18,39 @@ export const allDetailTrips = async (req: Request, res: Response) => {
 
   try {
     // 스케줄 정보 조회
-  const scheduleRepository = AppDataSource.getRepository(Schedule);
-  const schedule = await scheduleRepository.findOne({
-    where: {
-      id: scheduleId,
-    },
-  });
-
-  if (!schedule) {
-    res.status(StatusCodes.NOT_FOUND).json({ message: "Trip not found." });
-    return;
-  }
-
-  // 날짜 계산에 필요한 시작일, 종료일 가져오기
-  const startDate = new Date(schedule.start_date);
-  const endDate = new Date(schedule.end_date);
-
-  // 시작일과 종료일 사이의 날짜 생성
-  const dates = generateDatesBetween(startDate, endDate);
-  const detaList: string[] = [];
-
-  for (let i = 0; i < dates.length; i++) {
-    const formmat_date = dates[i].toISOString().split("T")[0];
-    detaList.push(formmat_date);
-  }
-
-  // 세부 일정 조회
-  const detailScheduleRepository = AppDataSource.getRepository(Detaile);
-  const detailedSchedule = await detailScheduleRepository.find({
-    where: {
-      schedule: { id: scheduleId },
-    },
-  });
-
-  const detailDate = detaList.map((currentDate) => {
-    const currentDateObj = parseISO(`${currentDate}T00:00:00`);
-    const matchingDates = detailedSchedule.filter((details) => {
-      const scheduleDate = details.schedule_date;
-      return isSameDay(scheduleDate, currentDateObj);
+    const scheduleRepository = AppDataSource.getRepository(Schedule);
+    const schedule = await scheduleRepository.findOne({
+      where: {
+        id: scheduleId,
+      },
     });
 
-    return {
-      scheduleDate: currentDate, // 날짜
-      currentDate:
-        matchingDates.length > 0 ? matchingDates : "No detail available", // 해당 날짜의 상세 일정들
-    };
-  });
+    if (!schedule) {
+      res.status(StatusCodes.NOT_FOUND).json({ message: "Trip not found." });
+      return;
+    }
 
-  res.status(StatusCodes.OK).json({
-    scheduleDate: detailDate, // 날짜별 세부 일정
-    date: detailedSchedule, // 모든 상세 일정 데이터 반환
-  });
+    // 날짜 계산에 필요한 시작일, 종료일 가져오기
+    const startDate = new Date(schedule.start_date);
+    const endDate = new Date(schedule.end_date);
+
+    // 시작일과 종료일 사이의 날짜 생성
+    const detaList = generateFormattedDates(startDate, endDate);
+
+    // 세부 일정 조회
+    const detailScheduleRepository = AppDataSource.getRepository(Detaile);
+    const detailedSchedule = await detailScheduleRepository.find({
+      where: {
+        schedule: { id: scheduleId },
+      },
+    });
+
+    const detailDate = findDetailedSchedules(detaList, detailedSchedule);
+
+    res.status(StatusCodes.OK).json({
+      scheduleDate: detailDate, // 날짜별 세부 일정
+      date: detailedSchedule, // 모든 상세 일정 데이터 반환
+    });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: "Error creating user",
@@ -72,10 +61,72 @@ export const allDetailTrips = async (req: Request, res: Response) => {
 
 // 세부 일정 추가
 export const addDetailTrips = async (req: Request, res: Response) => {
-  console.log("세부 일정 추가");
-  res.status(StatusCodes.OK).json({
-    message: "세부 일정 추가",
-  });
+  // 날짜 범위는 어떻게 정할까..
+  await body("scheduleDate")
+    .notEmpty()
+    .withMessage("일정 날짜를 입력해주세요.")
+    .isDate()
+    .withMessage("올바른 날짜 형식(YYYY-MM-DD)으로 입력해주세요.")
+    .run(req);
+  await body("scheduleTime")
+    .notEmpty()
+    .withMessage("일정 시간을 입력해주세요.")
+    .run(req);
+  await body("scheduleContent")
+    .notEmpty()
+    .withMessage("일정 내용을 입력해주세요.")
+    .isLength({ min: 2 })
+    .withMessage("내용은 2글자 이상으로 입력해주세요.")
+    .run(req);
+  const scheduleId = Number(req.params.tripId);
+  const { scheduleDate, scheduleTime, scheduleContent } = req.body;
+  // 날짜를 UTC로 변환
+  const utcScheduleDate = convertToUTC(scheduleDate);
+
+  try {
+    // 생성하기 전 날짜가 범위안에 들어오는지 확인
+    const scheduleRepository = AppDataSource.getRepository(Schedule);
+    const schedule = await scheduleRepository.findOne({
+      where: {
+        id: scheduleId,
+      },
+    });
+
+    if (!schedule) {
+      res.status(StatusCodes.NOT_FOUND).json({ message: "Trip not found." });
+      return;
+    }
+
+    // 날짜 계산에 필요한 시작일, 종료일 가져오기
+    const startDate = new Date(schedule.start_date);
+    const endDate = new Date(schedule.end_date);
+    const inputDate = new Date(utcScheduleDate);
+
+    if (!isDateInRange(inputDate, startDate, endDate)) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        message: "시작일과 종료일 사이의 날짜를 입력해주세요.",
+        inputDate: inputDate,
+        start: startDate
+      });
+      return;
+    }
+
+    await insertDetailSchedule(
+      scheduleId,
+      utcScheduleDate,
+      scheduleTime,
+      scheduleContent
+    );
+    res.status(StatusCodes.OK).json({
+      message: "Schedule created successfully",
+    });
+  } catch (error) {
+    // 500 에러
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Error creating user",
+      error,
+    });
+  }
 };
 
 // 세부 일정 수정
@@ -92,17 +143,4 @@ export const removeDetailTrips = (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
     message: "세부 일정 삭제",
   });
-};
-
-// 날짜 생성 함수
-const generateDatesBetween = (start_date: Date, end_date: Date): Date[] => {
-  const dates: Date[] = [];
-  const currentDate = new Date(start_date);
-
-  while (currentDate <= end_date) {
-    dates.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1); // 하루를 더함
-  }
-
-  return dates;
 };
