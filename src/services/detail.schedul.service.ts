@@ -12,9 +12,9 @@ export const insertDetailSchedule = async (
   const scheduleRepository = AppDataSource.getRepository(Schedule);
   const schedule = await scheduleRepository.findOne({
     where: {
-      id: schedule_id
-    }
-  })
+      id: schedule_id,
+    },
+  });
 
   const detailScheduleRepository = AppDataSource.getRepository(Detaile);
 
