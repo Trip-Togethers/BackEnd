@@ -11,6 +11,7 @@ import {
   generateFormattedDates,
   isDateInRange,
 } from "../utils/detail.schedule.util";
+import { resetScheduleIds } from "./schedule.controller";
 
 // 세부 일정 조회
 export const allDetailTrips = async (req: Request, res: Response) => {
@@ -230,9 +231,50 @@ export const editDetailTrips = async (req: Request, res: Response) => {
 };
 
 // 세부 일정 삭제
-export const removeDetailTrips = (req: Request, res: Response) => {
-  console.log("세부 일정 삭제");
-  res.status(StatusCodes.OK).json({
-    message: "세부 일정 삭제",
-  });
+export const removeDetailTrips = async (req: Request, res: Response) => {
+  const tripId = Number(req.params.tripId);
+  const { detailId } = req.body;
+
+  try {
+    const scheduleRepository = AppDataSource.getRepository(Schedule);
+    const schedule = await scheduleRepository.findOne({
+      where: {
+        id: tripId,
+      },
+    });
+
+    if (!schedule) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "해당 일정을 찾을 수 없습니다.",
+      });
+      return;
+    }
+
+    const detailScheduleRepository = AppDataSource.getRepository(Detaile);
+    const detailSchedules = await detailScheduleRepository.findOne({
+      where: {
+        id: detailId,
+      },
+    });
+
+    if (!detailSchedules) {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "세부 일정을 찾을 수 없습니다." });
+      return;
+    }
+
+    // 일정 삭제
+    await detailScheduleRepository.remove(detailSchedules);
+    await resetScheduleIds();
+    res.status(StatusCodes.OK).json({
+      message: "세부 일정이 성공적으로 삭제되었습니다."
+    })
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "세부 일정 삭제 중 오류가 발생했습니다.",
+      error: error,
+    });
+    return;
+  }
 };
