@@ -1,9 +1,12 @@
 import {
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn, 
 } from "typeorm";
+
+import { Detaile } from "./detail.schedule.entity";
 
 @Entity("schedule")
 export class Schedule {
@@ -34,4 +37,7 @@ export class Schedule {
 
   @Column()
   photo_url!: string
+  
+  @OneToMany(() => Detaile, (detail) => detail.schedule)
+  details!: Detaile[]; // 여러 개의 세부 일정을 포함하는 관계 설정
 }
