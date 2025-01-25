@@ -1,4 +1,5 @@
 import { DataSource } from "typeorm";
+import { Schedule } from "./entities/schedule.entity";
 
 const AppDataSource = new DataSource({
   type: "mysql",
@@ -9,7 +10,7 @@ const AppDataSource = new DataSource({
   database: "trip_together", // DB 이름
   synchronize: true, // 개발 환경에서는 true, 배포 환경에서는 false
   logging: true,
-  entities: [], // 엔티티 등록
+  entities: [Schedule], // 엔티티 등록
 });
 
 export default AppDataSource;

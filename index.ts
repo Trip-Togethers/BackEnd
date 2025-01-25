@@ -1,6 +1,7 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import AppDataSource from "./src/data-source";
+import mainPageRouter from './src/routes/schedule'
 
 
 // dotenv 모듈 로드
@@ -34,4 +35,5 @@ AppDataSource.initialize()
   });
 
 // 라우터 설정
+app.use("/trips", mainPageRouter);
 app.use('/uploads', express.static('uploads'));
