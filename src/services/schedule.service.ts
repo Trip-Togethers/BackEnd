@@ -9,7 +9,7 @@ export const insertSchedule = async (
   end_date: Date,
   email: string,
   photo_url: string
-) => {
+) => { 
   const scheduleRepository = AppDataSource.getRepository(Schedule);
 
   // 새 일정 객체 생성

@@ -7,7 +7,7 @@ import {
 import { upload } from "../middleware/multer.config";
 
 
-const router: Router = Router();
+const router: Router = Router(); 
 
 // 여행 일정 조회
 router.get("/", (req: Request, res: Response) => allTrips(req, res));

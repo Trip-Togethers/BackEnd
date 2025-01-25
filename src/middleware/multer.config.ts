@@ -3,7 +3,7 @@ import path from "path";
 
 // Multer 설정
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (req, file, cb) => { 
     cb(null, "uploads/"); // 파일을 저장할 디렉토리 설정
   },
   filename: (req, file, cb) => {

@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { insertSchedule } from "../services/schedule.service";
 import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
-import { body, validationResult } from "express-validator";
+import { body, validationResult } from "express-validator"; 
 
 // 여행 일정 조회
 export const allTrips = async (req: Request, res: Response) => {
