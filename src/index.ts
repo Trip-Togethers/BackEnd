@@ -3,6 +3,7 @@ import { AppDataSource } from './data-source';
 
 import communityRouter from './routes/community.routes';
 import calendarRouter from './routes/calendar.routes';
+import mapRouter from './routes/maps.routes';
 
 const app = express();
 
@@ -16,6 +17,7 @@ AppDataSource.initialize()
 
         app.use('/posts', communityRouter);
         app.use('/calendar', calendarRouter);
+        app.use('/maps', mapRouter);
 
         // 서버 실행
         app.listen(app.get('port'), () => {
