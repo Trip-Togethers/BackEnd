@@ -7,8 +7,8 @@ import { Guest } from "../entities/guest.entity";
 
 // 동행자 추가
 export const addGuestToSchedule = async (req: Request, res: Response) => {
-  const { tripId, inviteCode } = req.params;
-  const { userId } = req.body;
+  const { tripId, userId, inviteCode } = req.params;
+  
   try {
     const guestRepository = AppDataSource.getRepository(Guest);
     // 초대 링크 유효성 검증
@@ -62,13 +62,12 @@ export const createInviteLink = async (req: Request, res: Response) => {
   const { tripId } = req.params;
   const { userId } = req.body;
 
-  const numTripId = Number(tripId);
   try {
     const inviteCode = crypto.randomBytes(16).toString("hex");
-    console.log(numTripId, userId, inviteCode);
-    await insertInviteLink(numTripId, userId, inviteCode);
+    console.log(tripId, userId, inviteCode);
+    await insertInviteLink(Number(tripId), Number(userId), inviteCode);
 
-    const inviteLink = `localhost:1111/trips/details/${tripId}/${userId}/${inviteCode}`;
+    const inviteLink = `localhost:1111/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
 
     console.log(inviteLink);
     res.status(StatusCodes.OK).json({
@@ -77,6 +76,43 @@ export const createInviteLink = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       error: "초대 링크 생성에 실패했습니다.",
+    });
+  }
+};
+
+// 동행자 삭제 
+export const removeGuestToSchedule = async (req:Request, res: Response) => {
+  const { tripId, userId } = req.params;
+  
+  try {
+    const guestRepository = AppDataSource.getRepository(Guest);
+
+    const guest = await guestRepository.findOne({
+      where: {
+        schedule: {
+          id: Number(tripId),
+        },
+        user_id: Number(userId),
+      },
+      relations: ["schedule"],
+    });
+
+    if (!guest) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "해당 동행자를 찾을 수 없습니다.",
+      });
+      return;
+    }
+
+    await guestRepository.remove(guest);
+
+    res.status(StatusCodes.OK).json({
+      message: "동행자가 삭제되었습니다.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "동행자를 삭제하는 중 오류가 발생했습니다.",
     });
   }
 };

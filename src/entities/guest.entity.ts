@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Schedule } from "./schedule.entity";
 
 @Entity()
@@ -19,5 +19,6 @@ export class Guest {
   accepted_at!: Date | null; // 동행자가 초대를 수락한 시점
 
   @ManyToOne(() => Schedule, (schedule) => schedule.guests)
+  @JoinColumn({ name: 'schedule_id' })
   schedule!: Schedule; // 이 동행자가 속한 일정
 }
