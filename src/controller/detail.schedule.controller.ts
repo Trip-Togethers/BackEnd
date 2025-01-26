@@ -14,7 +14,7 @@ import {
 import { resetScheduleIds } from "./schedule.controller";
 
 // 세부 일정 조회
-export const allDetailTrips = async (req: Request, res: Response) => {
+export const lookUpDetailTrips = async (req: Request, res: Response) => {
   const tripId = Number(req.params.tripId);
 
   try {

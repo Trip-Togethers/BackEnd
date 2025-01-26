@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import {
   addDetailTrips,
-  allDetailTrips,
+  lookUpDetailTrips,
   editDetailTrips,
   removeDetailTrips,
 } from "../controller/detail.schedule.controller";
@@ -12,7 +12,7 @@ const router: Router = Router();
 
 // 세부 일정 조회
 router.get("/:tripId", (req: Request, res: Response) =>
-  allDetailTrips(req, res)
+  lookUpDetailTrips(req, res)
 );
 
 // 세부 일정 추가
