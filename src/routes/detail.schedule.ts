@@ -5,6 +5,8 @@ import {
   editDetailTrips,
   removeDetailTrips,
 } from "../controller/detail.schedule.controller";
+import { createInviteLink } from "../controller/guest.controller";
+import { addGuestToSchedule } from "../controller/guest.controller";
 
 const router: Router = Router(); 
 
@@ -26,6 +28,11 @@ router.put("/:tripId", (req: Request, res: Response) =>
 router.delete("/:tripId", (req: Request, res: Response) =>
   removeDetailTrips(req, res)
 );
-// 초대하기
+
+// 초대 링크 생성
+router.post("/:tripId/invite", (req: Request, res: Response) => createInviteLink(req, res));
+
+// 게스트 추가
+router.get("/:tripId/invite/:inviteCode", (req: Request, res: Response) => addGuestToSchedule(req, res));
 
 export default router;

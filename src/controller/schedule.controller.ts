@@ -6,7 +6,7 @@ import { Schedule } from "../entities/schedule.entity";
 import { body, validationResult } from "express-validator"; 
 
 // 여행 일정 조회
-export const allTrips = async (req: Request, res: Response) => {
+export const lookUpTrips = async (req: Request, res: Response) => {
   await body("email")
     .notEmpty()
     .withMessage("이메일을 입력해주세요.")

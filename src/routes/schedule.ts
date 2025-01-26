@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import {
-  allTrips,
+  lookUpTrips,
   addTrips,
   removeTrips
 } from "../controller/schedule.controller";
@@ -10,7 +10,7 @@ import { upload } from "../middleware/multer.config";
 const router: Router = Router(); 
 
 // 여행 일정 조회
-router.get("/", (req: Request, res: Response) => allTrips(req, res));
+router.get("/", (req: Request, res: Response) => lookUpTrips(req, res));
 
 // 여행 일정 추가
 router.post("/", upload.single("image"), (req: Request, res: Response) => addTrips(req, res));

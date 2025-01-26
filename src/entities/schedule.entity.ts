@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 
 import { Detaile } from "./detail.schedule.entity";
+import { Guest } from './guest.entity';
 
 @Entity("schedule")
 export class Schedule {
@@ -40,4 +41,7 @@ export class Schedule {
   
   @OneToMany(() => Detaile, (detail) => detail.schedule)
   details!: Detaile[]; // 여러 개의 세부 일정을 포함하는 관계 설정
+
+  @OneToMany(() => Guest, (guest) => guest.schedule)
+  guests!: Guest[]; // 동행자 목록
 }
