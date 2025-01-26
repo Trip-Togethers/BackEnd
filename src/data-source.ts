@@ -1,15 +1,18 @@
+import "reflect-metadata";
 import { DataSource } from "typeorm";
 
-const AppDataSource = new DataSource({
-  type: "mysql",
-  host: "127.0.0.1", // DB 호스트
-  port: 3306, // MySQL 포트
-  username: "root", // DB 사용자명
-  password: "root", // DB 비밀번호
-  database: "trip_together", // DB 이름
-  synchronize: true, // 개발 환경에서는 true, 배포 환경에서는 false
-  logging: true,
-  entities: [], // 엔티티 등록
-});
+import dotenv from 'dotenv';
+dotenv.config();
 
-export default AppDataSource;
+export const AppDataSource = new DataSource({
+  type: "mysql", // 사용할 데이터베이스 타입 (mysql, postgres, sqlite 등)
+  host: process.env.DB_HOST,
+  port: 3306, // MySQL 기본 포트
+  username: process.env.DB_NAME, // 데이터베이스 사용자명
+  password: process.env.DB_PASS, // 데이터베이스 비밀번호
+  database: process.env.DB_BASE, // 사용할 데이터베이스 이름
+  synchronize: true, // 앱 실행 시 데이터베이스와 동기화 (개발 중에만 사용)
+  logging: false, // 쿼리 로그 출력 여부
+  entities: ["src/entities/*.ts"], // 엔티티 파일 경로
+  migrations: ["src/migrations/*.ts"], // 마이그레이션 파일 경로
+});

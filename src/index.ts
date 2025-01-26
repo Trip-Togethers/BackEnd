@@ -2,6 +2,7 @@ import express from 'express';
 import { AppDataSource } from './data-source';
 
 import communityRouter from './routes/community.routes';
+import calendarRouter from './routes/calendar.routes';
 
 const app = express();
 
@@ -14,6 +15,7 @@ AppDataSource.initialize()
         console.log('Database connected successfully!');
 
         app.use('/posts', communityRouter);
+        app.use('/calendar', calendarRouter);
 
         // 서버 실행
         app.listen(app.get('port'), () => {

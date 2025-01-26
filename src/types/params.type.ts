@@ -21,3 +21,7 @@ export interface GetCommentByIdParams {
 export interface updateCommentBody {
   content?: string;
 }
+
+export interface GetCalendarByIdParams {
+  user_id: number;
+}
