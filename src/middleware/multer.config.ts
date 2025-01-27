@@ -1,13 +1,47 @@
 import multer from "multer";
 import path from "path";
+import { Upload } from "@aws-sdk/lib-storage";
+import fs from "fs";
+import { S3Client } from "@aws-sdk/client-s3";
+import dotenv from "dotenv"; 
+
+dotenv.config();
+
+// S3 객체 생성
+const s3 = new S3Client({
+  region: "us-east-1",
+  endpoint: `${process.env.MINIO_ENDPOINT}`,
+  credentials: {
+    accessKeyId: `${process.env.MINIO_ACCESS_KEY}`,
+    secretAccessKey: `${process.env.MINIO_SECRET_KEY}`,
+  },
+  forcePathStyle: true, // path style 사용
+});
+
+// S3 객체 사용
+export const uploadParams = async (filePath: string, fileName: string) => {
+  try {
+    const fileStream = fs.createReadStream(filePath);
+
+    const upload = new Upload({
+      client: s3,
+      params: { Bucket: "my-bucket", Key: fileName, Body: fileStream },
+    });
+
+    const data = await upload.done();
+    console.log("파일 업로드 성공:", data);
+  } catch (err) {
+    console.error("파일 업로드 실패:", err);
+  }
+};
 
 // Multer 설정
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => { 
+  destination: (req, file, cb) => {
     cb(null, "uploads/"); // 파일을 저장할 디렉토리 설정
   },
   filename: (req, file, cb) => {
-    const unique_suffix  = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const unique_suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     cb(null, `${unique_suffix}${path.extname(file.originalname)}`);
   },
 });
@@ -28,5 +62,5 @@ const fileFilter = (
 export const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },    // 파일 크기 제한
-}); 
+  limits: { fileSize: 5 * 1024 * 1024 }, // 파일 크기 제한
+});

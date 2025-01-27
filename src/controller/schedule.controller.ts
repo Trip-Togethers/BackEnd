@@ -3,10 +3,11 @@ import { StatusCodes } from "http-status-codes";
 import { insertSchedule } from "../services/schedule.service";
 import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
-import { body, validationResult } from "express-validator"; 
+import { body, validationResult } from "express-validator";
+import { uploadParams } from "../middleware/multer.config";
 
 // 여행 일정 조회
-export const allTrips = async (req: Request, res: Response) => {
+export const loopUpTrips = async (req: Request, res: Response) => {
   await body("email")
     .notEmpty()
     .withMessage("이메일을 입력해주세요.")
@@ -32,7 +33,7 @@ export const allTrips = async (req: Request, res: Response) => {
 
   if (!user || user.length === 0) {
     res.status(StatusCodes.BAD_REQUEST).json({
-      message: "User not found",
+      message: "사용자를 찾을 수 없습니다.",
     });
     return;
   }
@@ -61,7 +62,7 @@ export const addTrips = async (req: Request, res: Response) => {
     .custom((value, { req }) => {
       const startDate = new Date(req.body.startDate);
       const endDate = new Date(value);
-      
+
       if (startDate > endDate) {
         throw new Error("종료일은 시작일보다 늦어야 합니다.");
       }
@@ -89,16 +90,37 @@ export const addTrips = async (req: Request, res: Response) => {
   // 제목, 목적지, 기간 (시작일, 종료일)
   const { title, destination, startDate, endDate, email } = req.body;
   const photoFilePath = handleFileUpload(req);
-  const photoUrl = photoFilePath ? photoFilePath : '';
+  const photoUrl = photoFilePath ? photoFilePath : "";
+
+  if (photoFilePath && req.file?.path) {
+    try {
+      await uploadParams(req.file?.path, req.file?.filename);
+    } catch (error) {
+      console.error("파일 업로드 실패:", error);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "파일 업로드 오류",
+        error,
+      });
+      return;
+    }
+  }
+
   try {
-    await insertSchedule(title, destination, startDate, endDate, email, photoUrl);
+    await insertSchedule(
+      title,
+      destination,
+      startDate,
+      endDate,
+      email,
+      photoUrl
+    );
     res.status(StatusCodes.OK).json({
-      message: "Schedule created successfully",
+      message: "일정이 성공적으로 생성되었습니다",
     });
   } catch (error) {
     // 500 에러
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error creating user",
+      message: "사용자 생성 오류",
       error,
     });
   }
@@ -151,7 +173,7 @@ const handleFileUpload = (req: Request): string | null => {
     return null;
   }
   return `/uploads/${req.file.filename}`;
-}
+};
 
 // AUTO_INCREMENT 값을 재설정하는 함수
 export const resetScheduleIds = async () => {
