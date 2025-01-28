@@ -6,6 +6,7 @@
     "sourceMap": true,           // TypeScript가 .map 파일 생성 여부
     "outDir": "./dist",          // 컴파일된 JavaScript 파일이 저장될 폴더
     "rootDir": "./src",          // TypeScript 소스 파일의 루트 디렉토리
+    "strictPropertyInitialization": false,
     "esModuleInterop": true,     // ES 모듈과 CommonJS 모듈 간의 호환성을 위해 true로 설정
     "skipLibCheck": true,        // 라이브러리 파일 검사 생략 (속도 향상)
     "forceConsistentCasingInFileNames": true, // 파일 이름의 대소문자 일관성을 강제
