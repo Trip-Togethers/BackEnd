@@ -3,20 +3,21 @@ import {
   addTrips,
   removeTrips,
   loopUpTrips
-} from "../controller/schedule.controller";
+} from "../controllers/schedule.controller";
 import { upload } from "../middleware/multer.config";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 
 const router: Router = Router(); 
 
 // 여행 일정 조회
-router.get("/", (req: Request, res: Response) => loopUpTrips(req, res));
+router.get("/", authMiddleware, (req: Request, res: Response) => loopUpTrips(req, res));
 
 // 여행 일정 추가
-router.post("/", upload.single("image"), (req: Request, res: Response) => addTrips(req, res));
+router.post("/", authMiddleware, upload.single("image"), (req: Request, res: Response) => addTrips(req, res));
 
 // 여행 일정 삭제
-router.delete("/:tripId", (req: Request, res: Response) => removeTrips(req, res));
+router.delete("/:tripId", authMiddleware, (req: Request, res: Response) => removeTrips(req, res));
 
 
 export default router;

@@ -2,8 +2,11 @@
 import { DataSource } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Token } from './entities/token.entity';
+import { Schedule } from './entities/schedule.entity';
+import dotenv from "dotenv";
+dotenv.config();
 
-export const AppDataSource = new DataSource({
+const AppDataSource = new DataSource({
   type: 'mysql',
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '3306', 10),
@@ -15,8 +18,4 @@ export const AppDataSource = new DataSource({
   logging: false,
 });
 
-export async function connectDatabase(): Promise<void> {
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
-  }
-}
+export default AppDataSource;

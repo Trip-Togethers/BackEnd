@@ -1,9 +1,12 @@
 import {
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn, 
+  UpdateDateColumn,
 } from "typeorm";
+import { User } from "./user.entity";
 
 @Entity("schedule")
 export class Schedule {
@@ -30,8 +33,10 @@ export class Schedule {
   updated_at!: Date;
 
   @Column()
-  user!: string
+  photo_url!: string;
 
-  @Column()
-  photo_url!: string
+  // user_id 외래키 설정
+  @ManyToOne(() => User, (user) => user.schedule)
+  @JoinColumn({ name: "user_email", referencedColumnName: "email" })
+  user!: User;
 }

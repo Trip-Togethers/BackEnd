@@ -9,7 +9,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
       return;
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader
     if (!token) {
       res.status(401).json({ message: '토큰 형식이 잘못되었습니다.' });
       return;
@@ -22,6 +22,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
     }
 
     (req as any).user = decoded;
+    console.log(decoded)
     next();
   } catch (error: any) {
     console.error(error);
