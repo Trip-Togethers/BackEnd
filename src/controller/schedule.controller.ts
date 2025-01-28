@@ -3,80 +3,54 @@ import { StatusCodes } from "http-status-codes";
 import { insertSchedule } from "../services/schedule.service";
 import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
-import { body, validationResult } from "express-validator";
+import { validationResult } from "express-validator";
 import { uploadParams } from "../middleware/multer.config";
+import {
+  validateAddTrip,
+  validateLookupTrips,
+} from "../middleware/schedule.validators";
+import { error } from "console";
 
 // 여행 일정 조회
 export const loopUpTrips = async (req: Request, res: Response) => {
-  await body("email")
-    .notEmpty()
-    .withMessage("이메일을 입력해주세요.")
-    .isEmail()
-    .withMessage("유효한 이메일을 입력해 주세요")
-    .run(req);
-  // 유효성 검사 결과 확인
+  await Promise.all(validateLookupTrips.map((validator) => validator.run(req)));
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      errors: errors.array(),
-    });
+    res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
     return;
   }
-
   const { email } = req.body;
 
-  // 이메일에 해당하는 일정 조회
-  const scheduleRepository = AppDataSource.getRepository(Schedule);
-  const user = await scheduleRepository.find({
-    where: { user: email },
-  });
-
-  if (!user || user.length === 0) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      message: "사용자를 찾을 수 없습니다.",
+  try {
+    // 이메일에 해당하는 일정 조회
+    const scheduleRepository = AppDataSource.getRepository(Schedule);
+    const user = await scheduleRepository.find({
+      where: { user: email },
     });
-    return;
-  }
 
-  res.status(StatusCodes.OK).json({
-    schedules: user,
-  });
+    if (!user || user.length === 0) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "해당 이메일로 등록된 일정이 없습니다.",
+      });
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      schedules: user,
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "일정을 찾을 수 없습니다.",
+      error,
+    });
+  }
 };
 
 // 여행 일정 추가
 export const addTrips = async (req: Request, res: Response) => {
   // express-validator로 요청 데이터 검증
-  await body("title")
-    .notEmpty()
-    .withMessage("제목을 입력해 주세요")
-    .isLength({ min: 3, max: 50 })
-    .withMessage("제목은 3자 이상, 50자 이하로 입력해 주세요.")
-    .run(req);
-  await body("startDate")
-    .isDate()
-    .withMessage("시작일을 올바르게 입력해 주세요")
-    .run(req);
-  await body("endDate")
-    .isDate()
-    .withMessage("종료일을 올바르게 입력해 주세요")
-    .custom((value, { req }) => {
-      const startDate = new Date(req.body.startDate);
-      const endDate = new Date(value);
-
-      if (startDate > endDate) {
-        throw new Error("종료일은 시작일보다 늦어야 합니다.");
-      }
-      return true;
-    })
-    .run(req);
-  await body("destination")
-    .notEmpty()
-    .withMessage("목적지를 입력해 주세요")
-    .run(req);
-  await body("email")
-    .isEmail()
-    .withMessage("유효한 이메일을 입력해 주세요")
-    .run(req);
+  await Promise.all(validateAddTrip.map((validator) => validator.run(req)));
 
   // 유효성 검사 결과 확인
   const errors = validationResult(req);
@@ -118,7 +92,6 @@ export const addTrips = async (req: Request, res: Response) => {
       message: "일정이 성공적으로 생성되었습니다",
     });
   } catch (error) {
-    // 500 에러
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: "사용자 생성 오류",
       error,
@@ -152,18 +125,26 @@ export const removeTrips = async (req: Request, res: Response) => {
       return;
     }
 
-    // 일정 삭제
-    await scheduleRepository.remove(schedule);
-    await resetScheduleIds();
-    res.status(StatusCodes.OK).json({
-      message: "일정이 성공적으로 삭제되었습니다.",
-    });
-  } catch (err) {
-    const error = err as Error;
+    try {
+      // 일정 삭제
+      await scheduleRepository.remove(schedule);
+      res.status(StatusCodes.OK).json({
+        message: "일정이 성공적으로 삭제되었습니다.",
+      });
+    } catch (err) {
+      const error = err as Error;
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "일정 삭제 중 오류가 발생했습니다.",
+        error: error.message,
+      });
+    }
+  } catch (findError) {
+    console.error("일정 조회 중 오류 발생:", findError);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "일정 삭제 중 오류가 발생했습니다.",
-      error: error.message,
+      message: "일정 조회 중 오류가 발생했습니다.",
+      error: error,
     });
+    return;
   }
 };
 
@@ -173,29 +154,4 @@ const handleFileUpload = (req: Request): string | null => {
     return null;
   }
   return `/uploads/${req.file.filename}`;
-};
-
-// AUTO_INCREMENT 값을 재설정하는 함수
-export const resetScheduleIds = async () => {
-  try {
-    const queryRunner = AppDataSource.createQueryRunner();
-    await queryRunner.startTransaction();
-
-    // 현재 테이블에서 가장 큰 ID 값 구하기
-    const result = await queryRunner.query(
-      "SELECT MAX(id) AS max_id FROM schedule"
-    );
-    const maxId = result[0].max_id || 0; // 가장 큰 id 값 가져오기, 없으면 0
-
-    // AUTO_INCREMENT를 max_id + 1로 설정
-    await queryRunner.query(
-      `ALTER TABLE schedule AUTO_INCREMENT = ${maxId + 1}`
-    );
-
-    await queryRunner.commitTransaction();
-    await queryRunner.release();
-  } catch (err) {
-    console.error("ID 재정렬 오류:", err);
-    throw err;
-  }
 };
