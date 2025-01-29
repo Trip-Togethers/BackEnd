@@ -1,18 +1,23 @@
 import "reflect-metadata";
-import { DataSource } from "typeorm";
-
-import dotenv from 'dotenv';
+taSource } from 'typeorm';
+import { User } from './entities/user.entity';
+import { Token } from './entities/token.entity';
+import { Schedule } from './entities/schedule.entity';
+import { Detaile } from "./entities/detail.schedule.entity";
+import { Guest } from "./entities/guest.entity";
+import dotenv from "dotenv";
 dotenv.config();
 
-export const AppDataSource = new DataSource({
-  type: "mysql", // 사용할 데이터베이스 타입 (mysql, postgres, sqlite 등)
+const AppDataSource = new DataSource({
+  type: 'mysql',
   host: process.env.DB_HOST,
-  port: 3306, // MySQL 기본 포트
-  username: process.env.DB_NAME, // 데이터베이스 사용자명
-  password: process.env.DB_PASS, // 데이터베이스 비밀번호
-  database: process.env.DB_BASE, // 사용할 데이터베이스 이름
-  synchronize: true, // 앱 실행 시 데이터베이스와 동기화 (개발 중에만 사용)
-  logging: false, // 쿼리 로그 출력 여부
-  entities: ["src/entities/*.ts"], // 엔티티 파일 경로
-  migrations: ["src/migrations/*.ts"], // 마이그레이션 파일 경로
+  port: parseInt(process.env.DB_PORT || '3306', 10),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  entities: [User, Token, Schedule, Detaile, Guest],
+  synchronize: true,
+  logging: false,
 });
+
+export default AppDataSource;
