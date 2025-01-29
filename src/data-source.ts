@@ -1,11 +1,11 @@
-import "reflect-metadata";
-taSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Token } from './entities/token.entity';
 import { Schedule } from './entities/schedule.entity';
 import { Detaile } from "./entities/detail.schedule.entity";
 import { Guest } from "./entities/guest.entity";
 import dotenv from "dotenv";
+import { Comments, Likes, Posts } from './entities/community.entity';
 dotenv.config();
 
 const AppDataSource = new DataSource({
@@ -15,7 +15,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [User, Token, Schedule, Detaile, Guest],
+  entities: [User, Token, Schedule, Detaile, Guest, Posts, Comments, Likes],
   synchronize: true,
   logging: false,
 });

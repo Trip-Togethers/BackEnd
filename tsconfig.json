@@ -13,7 +13,7 @@
     "experimentalDecorators": true, // 데코레이터 기능 사용 여부
     "emitDecoratorMetadata": true,  // 데코레이터를 통해 클래스와 속성에 대한 메타데이터 생성 여부
     "strict": true,               // 엄격한 타입 검사 활성화
-    "typeRoots": ["./node_modules/@types", "/types"]
+    "typeRoots": ["./node_modules/@types", "src/types"]
   },
   "include": ["src/**/*.ts"],     // 컴파일할 TypeScript 파일이 포함된 경로
   "exclude": ["node_modules"]     // 컴파일에서 제외할 폴더

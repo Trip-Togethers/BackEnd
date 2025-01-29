@@ -8,7 +8,6 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { User } from "./user.entity";
-
 import { Detaile } from "./detail.schedule.entity";
 import { Guest } from './guest.entity';
 

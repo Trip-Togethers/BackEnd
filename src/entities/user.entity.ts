@@ -1,14 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
-import { Posts } from './community.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   OneToMany,
-} from 'typeorm';
-import { Schedule } from './schedule.entity';
+} from "typeorm";
+import { Posts } from "./community.entity";
+import { Schedule } from "./schedule.entity";
 
 @Entity()
 export class User {
@@ -36,18 +36,21 @@ export class User {
   @OneToMany(() => Schedule, (schedule) => schedule.user)
   schedule?: Schedule[];
 
-@Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    profile_picture: string;
+  @Column()
+  profile_picture: string;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    contact: string;
+  @Column()
+  contact: string;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    login_category: string;
+  @Column()
+  login_category: string;
 
-    @DeleteDateColumn({ type: 'datetime', nullable: true })
-    deleted_at: Date;
+  @DeleteDateColumn({ type: "datetime", nullable: true })
+  deleted_at: Date;
 
-    @OneToMany(() => Posts, (post) => post.user_id)
-    posts: Posts[];
+  @OneToMany(() => Posts, (post) => post.user)
+  posts: Posts[];
+
+  // @OneToMany(() => Participant, (participant) => participant.user)
+  // participant!: Participant[];
 }

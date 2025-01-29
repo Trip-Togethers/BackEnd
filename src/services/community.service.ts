@@ -1,369 +1,522 @@
-import { AppDataSource } from '../data-source';
-import { Posts, Comments, Likes } from '../entities/community.entity';
-import { GetPostByIdParams, UpdatePostBody, addCommentToPostBody, GetCommentByIdParams, updateCommentBody } from '../types/params.type';
+import { StatusCodes } from "http-status-codes";
+import AppDataSource from "../data-source";
+import { Posts, Comments, Likes } from "../entities/community.entity";
+import { User } from "../entities/user.entity";
 
 export class CommunityServices {
-    static async getAllPosts() {
-        try {
-            const postRepository = AppDataSource.getRepository(Posts);
-            const commentRepository = AppDataSource.getRepository(Comments);
-            const likeRepository = AppDataSource.getRepository(Likes);
+  static async getAllPosts() {
+    try {
+      const postRepository = AppDataSource.getRepository(Posts);
+      const commentRepository = AppDataSource.getRepository(Comments);
+      const likeRepository = AppDataSource.getRepository(Likes);
 
-            // 전체 게시글 조회
-            const posts = await postRepository.find({
-                relations: ['user_id'], // 작성자 정보를 가져옴
-            });
+      // 전체 게시글 조회
+      const posts = await postRepository.find({
+        relations: ["user"], // 작성자 정보를 가져옴
+      });
 
-            const results = await Promise.all(
-                posts.map(async (post) => {
-                    try {
-                        // 댓글 수 가져오기
-                        const commentsCount = await commentRepository.createQueryBuilder('comments').where('comments.post_id = :post_id', { post_id: post.id }).getCount();
-
-                        // 좋아요 수 가져오기
-                        const likesCount = await likeRepository.createQueryBuilder('likes').where('likes.post_id = :post_id', { post_id: post.id }).getCount();
-
-                        // 작성자 정보 가져오기
-                        const author = {
-                            name: post.user_id?.name || 'Unknown',
-                            profile_picture: post.user_id?.profile_picture || '',
-                        };
-
-                        return {
-                            id: post.id,
-                            post_title: post.post_title,
-                            post_content: post.post_content,
-                            author: {
-                                nick: author.name,
-                                profile: author.profile_picture,
-                            },
-                            created_at: post.created_at,
-                            likes: likesCount,
-                            comments_count: commentsCount,
-                        };
-                    } catch (error) {
-                        return {
-                            id: post.id,
-                            post_title: post.post_title,
-                            post_content: post.post_content,
-                            author: {
-                                nick: 'Unknown',
-                                profile: '',
-                            },
-                            created_at: post.created_at,
-                            likes: 0,
-                            comments_count: 0,
-                        };
-                    }
-                })
-            );
-
-            return {
-                success: true,
-                message: '게시글 목록 불러오기 완료',
-                posts: results,
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '게시글 목록 불러오기 중 오류가 발생했습니다.',
-            };
-        }
-    }
-
-    static async createPost(params: { [key: string]: any }) {
-        const postRepository = AppDataSource.getRepository(Posts);
-        try {
-            const savedPost = await postRepository.save(params);
-            return {
-                success: true,
-                message: '게시글 작성 완료',
-                post: savedPost,
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '게시글 작성 중 오류가 발생했습니다.',
-            };
-        }
-    }
-
-    static async getPostById(params: GetPostByIdParams) {
-        const postRepository = AppDataSource.getRepository(Posts);
-        const commentRepository = AppDataSource.getRepository(Comments);
-        const likeRepository = AppDataSource.getRepository(Likes);
-
-        const post_id = Number(params.post_id);
-
-        try {
-            const post = await postRepository.findOne({
-                relations: ['user_id'],
-                where: { id: post_id },
-            });
-
+      const results = await Promise.all(
+        posts.map(async (post) => {
+          try {
             // 댓글 수 가져오기
-            const commentsCount = await commentRepository.createQueryBuilder('comments').where('comments.post_id = :post_id', { post_id: post_id }).getCount();
+            const commentsCount = await commentRepository
+              .createQueryBuilder("comments")
+              .where("comments.post_id = :post_id", { post_id: post.id })
+              .getCount();
+
             // 좋아요 수 가져오기
-            const likesCount = await likeRepository.createQueryBuilder('likes').where('likes.post_id = :post_id', { post_id: post_id }).getCount();
+            const likesCount = await likeRepository
+              .createQueryBuilder("likes")
+              .where("likes.post_id = :post_id", { post_id: post.id })
+              .getCount();
+
             // 작성자 정보 가져오기
             const author = {
-                name: post?.user_id?.name || 'Unknown',
-                profile_picture: post?.user_id?.profile_picture || '',
+              name: post.user.nickname || "Unknown",
+              profile_picture: post.user?.profile_picture || "",
             };
 
             return {
-                success: true,
-                message: '게시글 상세정보 불러오기 완료',
-                post: {
-                    id: post_id,
-                    post_title: post?.post_title,
-                    post_content: post?.post_content,
-                    post_photo_url: post?.post_photo_url,
-                    author: {
-                        nick: author.name,
-                        profile: author.profile_picture,
-                    },
-                    created_at: post?.created_at,
-                    updated_at: post?.updated_at,
-                    likes: likesCount,
-                    comments_count: commentsCount,
-                },
+              id: post.id,
+              post_title: post.post_title,
+              post_content: post.post_content,
+              author: {
+                nick: author.name,
+                profile: author.profile_picture,
+              },
+              created_at: post.created_at,
+              likes: likesCount,
+              comments_count: commentsCount,
             };
-        } catch (error) {
+          } catch (error) {
             return {
-                success: false,
-                message: '게시글 불러오기 중 오류가 발생했습니다.',
+              id: post.id,
+              post_title: post.post_title,
+              post_content: post.post_content,
+              author: {
+                nick: "Unknown",
+                profile: "",
+              },
+              created_at: post.created_at,
+              likes: 0,
+              comments_count: 0,
             };
-        }
+          }
+        })
+      );
+
+      return {
+        message: "게시글 목록 불러오기 완료",
+        statusCode: StatusCodes.OK,
+        posts: results,
+      };
+    } catch (error) {
+      return {
+        message: "게시글 목록 불러오기 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
 
-    static async updatePostById(params: GetPostByIdParams, body: UpdatePostBody) {
-        const postRepository = AppDataSource.getRepository(Posts);
-        const post_id = Number(params.post_id);
+  static async createPost(params: { [key: string]: any }) {
+    const postRepository = AppDataSource.getRepository(Posts);
 
-        try {
-            await postRepository.update({ id: post_id }, body);
+    console.log(params);
+    try {
+      const newPost = new Posts();
+      newPost.post_title = params.post_title;
+      newPost.post_photo_url = params.post_photo_url;
+      newPost.post_content = params.post_content;
+      newPost.user_id = params.userId;
+      newPost.trip_id = params.trip_id;
 
-            const post = await postRepository.findOne({
-                where: { id: post_id },
-            });
-
-            return {
-                success: true,
-                message: '게시글 수정 완료',
-                post: {
-                    id: post_id,
-                    post_title: post?.post_title,
-                    post_content: post?.post_content,
-                    post_photo_url: post?.post_photo_url,
-                    updated_at: post?.updated_at,
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '게시글 수정 중 오류가 발생했습니다.',
-            };
-        }
+      const savedPost = await postRepository.save(newPost);
+      return {
+        message: "게시글 작성 완료",
+        statusCode: StatusCodes.OK,
+        post: savedPost,
+      };
+    } catch (error) {
+      return {
+        message: "게시글 작성 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        error,
+      };
     }
+  }
 
-    static async deletePostById(params: GetPostByIdParams) {
-        const postRepository = AppDataSource.getRepository(Posts);
-        const post_id = Number(params.post_id);
-        try {
-            await postRepository.delete({ id: post_id });
+  static async getPostById(postId: number) {
+    const postRepository = AppDataSource.getRepository(Posts);
+    const commentRepository = AppDataSource.getRepository(Comments);
+    const likeRepository = AppDataSource.getRepository(Likes);
 
-            return {
-                success: true,
-                message: '게시글 삭제 완료',
-                post: {
-                    id: post_id,
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '게시글 삭제 중 오류가 발생했습니다.',
-            };
-        }
+    try {
+      const post = await postRepository.findOne({
+        relations: ["user"],
+        where: { id: postId },
+      });
+
+      if (!post) {
+        return {
+          message: "해당 게시글을 찾을 수 없습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
+
+      // 댓글 수 가져오기
+      const commentsCount = await commentRepository
+        .createQueryBuilder("comments")
+        .where("comments.post_id = :post_id", { post_id: postId })
+        .getCount();
+      // 좋아요 수 가져오기
+      const likesCount = await likeRepository
+        .createQueryBuilder("likes")
+        .where("likes.post_id = :post_id", { post_id: postId })
+        .getCount();
+      // 작성자 정보 가져오기
+      const author = {
+        name: post?.user?.nickname || "Unknown",
+        profile_picture: post?.user?.profile_picture || "",
+      };
+
+      return {
+        message: "게시글 상세정보 불러오기 완료",
+        statusCode: StatusCodes.OK,
+        post: {
+          id: postId,
+          post_title: post?.post_title,
+          post_content: post?.post_content,
+          post_photo_url: post?.post_photo_url,
+          author: {
+            nick: author.name,
+            profile: author.profile_picture,
+          },
+          created_at: post?.created_at,
+          updated_at: post?.updated_at,
+          likes: likesCount,
+          comments_count: commentsCount,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "게시글 불러오기 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
 
-    static async likePost(params: GetPostByIdParams) {
-        const likeRepository = AppDataSource.getRepository(Likes);
-        const post_id = Number(params.post_id);
-        try {
-            await likeRepository.insert({
-                post_id: post_id,
-                user_id: 2,
-            });
-            const likesCount = await likeRepository.createQueryBuilder('likes').where('likes.post_id = :post_id', { post_id: post_id }).getCount();
-            return {
-                success: true,
-                message: '좋아요 추가 완료',
-                post: {
-                    id: post_id,
-                    likes: likesCount,
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '좋아요 추가 중 오류가 발생했습니다.',
-            };
-        }
+  static async updatePostById(
+    postId: number,
+    params: { [key: string]: any },
+    userId: number
+  ) {
+    const postRepository = AppDataSource.getRepository(Posts);
+
+    try {
+      // 게시글 조회
+      const post = await postRepository.findOne({ where: { id: postId } });
+
+      // 게시글이 존재하지 않거나, 게시글 작성자가 userId와 다른경우
+      if (!post) {
+        return {
+          message: "게시글을 찾을 수 없습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
+
+      if (post.user_id !== userId) {
+        return {
+          message: "작성만 수정할 수 있습니다.",
+          statusCode: StatusCodes.FORBIDDEN,
+        };
+      }
+
+      await postRepository.update({ id: postId }, params);
+
+      return {
+        message: "게시글 수정 완료",
+        statusCode: StatusCodes.OK,
+        post: {
+          id: postId,
+          post_title: post?.post_title,
+          post_content: post?.post_content,
+          post_photo_url: post?.post_photo_url,
+          updated_at: post?.updated_at,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "게시글 수정 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
 
-    static async unlikePost(params: GetPostByIdParams) {
-        const likeRepository = AppDataSource.getRepository(Likes);
-        const post_id = Number(params.post_id);
-        try {
-            const unlike = await likeRepository.delete({ post_id: post_id, user_id: 2 });
-            const likesCount = await likeRepository.createQueryBuilder('likes').where('likes.post_id = :post_id', { post_id: post_id }).getCount();
+  static async deletePostById(postId: number, userId: number) {
+    const postRepository = AppDataSource.getRepository(Posts);
+    try {
+      // 게시글 조회
+      const post = await postRepository.findOne({ where: { id: postId } });
 
-            return {
-                success: true,
-                message: unlike.affected ? '좋아요 삭제 완료' : '삭제할 데이터가 없습니다.',
-                post: {
-                    id: post_id,
-                    likes: likesCount,
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '좋아요 삭제 중 오류가 발생했습니다.',
-            };
-        }
+      // 게시글이 존재하지 않거나, 게시글 작성자가 userId와 다른경우
+      if (!post) {
+        return {
+          message: "게시글을 찾을 수 없습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
+
+      // 이건 버튼을 보이지않게 하면 될 듯 싶다.
+      if (post.user_id !== userId) {
+        return {
+          message:
+            "삭제 권한이 없습니다. 다른 사용자의 게시글은 삭제할 수 없습니다.",
+            statusCode: StatusCodes.FORBIDDEN,
+        };
+      }
+
+      await postRepository.delete({ id: postId });
+
+      return {
+        message: "게시글 삭제 완료",
+        statusCode: StatusCodes.OK,
+        post: {
+          id: postId,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "게시글 삭제 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
 
-    static async getCommentsForPost(params: GetPostByIdParams) {
-        try {
-            const post_id = Number(params.post_id);
-            const commentRepository = AppDataSource.getRepository(Comments);
-
-            const comments = await commentRepository.find({
-                relations: ['user'],
-                where: { post_id: post_id },
-            });
-
-            const results = await Promise.all(
-                comments.map(async (comment) => {
-                    try {
-                        // 작성자 정보 가져오기
-                        const author = {
-                            name: comment?.user?.name || 'Unknown',
-                            profile_picture: comment?.user?.profile_picture || '',
-                        };
-
-                        return {
-                            id: comment.id,
-                            content: comment.content,
-                            author: {
-                                nick: author.name,
-                                profile: author.profile_picture,
-                            },
-                            created_at: comment.created_at,
-                        };
-                    } catch (error) {
-                        return {
-                            id: comment.id,
-                            content: comment.content,
-                            author: {
-                                nick: 'Unknown',
-                                profile: '',
-                            },
-                            created_at: comment.created_at,
-                        };
-                    }
-                })
-            );
-
-            return {
-                success: true,
-                message: '댓글 불러오기 완료',
-                posts: results,
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '댓글 불러오기 중 오류가 발생했습니다.',
-            };
-        }
+  static async likePost(postId: number, userId: number) {
+    const likeRepository = AppDataSource.getRepository(Likes);
+    try {
+      await likeRepository.insert({
+        post_id: postId,
+        user_id: userId,
+      });
+      const likesCount = await likeRepository
+        .createQueryBuilder("likes")
+        .where("likes.post_id = :post_id", { post_id: postId })
+        .getCount();
+      return {
+        message: "좋아요 추가 완료",
+        statusCode: StatusCodes.OK,
+        post: {
+          id: postId,
+          likes: likesCount,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "좋아요 추가 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
 
-    static async addCommentToPost(params: GetPostByIdParams, body: addCommentToPostBody) {
-        const post_id = Number(params.post_id);
-        let comment_data = body;
-        comment_data.post_id = post_id;
-        comment_data.user_id = 1;
+  static async unlikePost(postId: number, userId: number) {
+    const likeRepository = AppDataSource.getRepository(Likes);
+    try {
+      const unlike = await likeRepository.delete({
+        post_id: postId,
+        user_id: userId,
+      });
+      const likesCount = await likeRepository
+        .createQueryBuilder("likes")
+        .where("likes.post_id = :post_id", { post_id: postId })
+        .getCount();
 
-        const commentRepository = AppDataSource.getRepository(Comments);
-        try {
-            const savedComment = await commentRepository.save(comment_data);
-
-            return {
-                success: true,
-                message: '댓글 작성 완료',
-                comment: {
-                    content: savedComment.content,
-                    created_at: savedComment.created_at,
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '댓글 작성 중 오류가 발생했습니다.',
-            };
-        }
+      return {
+        message: unlike.affected
+          ? "좋아요 삭제 완료"
+          : "삭제할 데이터가 없습니다.",
+          statusCode: unlike.affected ? StatusCodes.OK : StatusCodes.NOT_FOUND ,
+        post: {
+          id: postId,
+          likes: likesCount,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "좋아요 삭제 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
 
-    static async updateComment(params: GetCommentByIdParams, body: updateCommentBody) {
-        const commentRepository = AppDataSource.getRepository(Comments);
-        const comment_id = Number(params.comment_id);
+  static async getCommentsForPost(postId: number) {
+    try {
+      const commentRepository = AppDataSource.getRepository(Comments);
 
-        try {
-            const updateComment = await commentRepository.update({ id: comment_id }, body);
-            const comment = await commentRepository.findOne({
-                where: { id: comment_id },
-            });
+      const comments = await commentRepository.find({
+        relations: ["user"],
+        where: { post_id: postId },
+      });
+
+      const results = await Promise.all(
+        comments.map(async (comment) => {
+          try {
+            // 작성자 정보 가져오기
+            const author = {
+              name: comment?.user?.nickname || "Unknown",
+              profile_picture: comment?.user?.profile_picture || "",
+            };
 
             return {
-                success: true,
-                message: updateComment.affected ? '댓글 수정 완료' : '수정할 댓글이 존재하지 않습니다.',
-                comment: {
-                    id: comment_id,
-                    content: comment?.content,
-                    created_at: comment?.created_at,
-                    updated_at: comment?.updated_at,
-                },
+              id: comment.id,
+              content: comment.content,
+              author: {
+                nick: author.name,
+                profile: author.profile_picture,
+              },
+              created_at: comment.created_at,
             };
-        } catch (error) {
+          } catch (error) {
             return {
-                success: false,
-                message: '댓글 수정 중 오류가 발생했습니다.',
+              id: comment.id,
+              content: comment.content,
+              author: {
+                nick: "Unknown",
+                profile: "",
+              },
+              created_at: comment.created_at,
             };
-        }
+          }
+        })
+      );
+
+      return {
+        message: "댓글 불러오기 완료",
+        statusCode: StatusCodes.OK,
+        posts: results,
+      };
+    } catch (error) {
+      return {
+        message: "댓글 불러오기 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
 
-    static async deleteComment(params: GetCommentByIdParams) {
-        const commentRepository = AppDataSource.getRepository(Comments);
-        const comment_id = Number(params.comment_id);
+  static async addCommentToPost(
+    postId: number,
+    userId: number,
+    comment: string
+  ) {
+    const postRepository = AppDataSource.getRepository(Posts);
+    const commentRepository = AppDataSource.getRepository(Comments);
+    try {
+      const post = await postRepository.findOne({ where: { id: postId } });
 
-        try {
-            const comment = await commentRepository.delete({ id: comment_id, user_id: 2 });
+      if (!post) {
+        return {
+          message: "게시글을 찾을 수 없습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
 
-            return {
-                success: true,
-                message: comment.affected ? '댓글 삭제 완료' : '삭제할 데이터가 없습니다.',
-                comment: {
-                    id: comment_id,
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: '댓글 삭제 중 오류가 발생했습니다.',
-            };
-        }
+      // 로그인한 사용자가 댓글을 달 수 있는지 확인
+      if (!userId) {
+        return {
+          message: "로그인한 사용자만 댓글을 달 수 있습니다.",
+          statusCode: StatusCodes.FORBIDDEN,
+        };
+      }
+
+      const newCommentst = new Comments();
+      (newCommentst.post_id = postId),
+        (newCommentst.user_id = userId),
+        (newCommentst.content = comment);
+
+      const savedComment = await commentRepository.save(newCommentst);
+
+      return {
+        message: "댓글 작성 완료",
+        statusCode: StatusCodes.OK,
+        comment: {
+          content: savedComment.content,
+          created_at: savedComment.created_at,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "댓글 작성 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
     }
+  }
+
+  static async updateComment(postId: number, userId: number, comment: string) {
+    const commentRepository = AppDataSource.getRepository(Comments);
+
+    try {
+      // 해당 댓글을 먼저 조회하여 작성자 ID 확인
+      const existingComment = await commentRepository.findOne({
+        where: { id: postId },
+      });
+
+      if (!existingComment) {
+        return {
+          message: "수정할 댓글이 존재하지 않습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
+
+      // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
+      if (existingComment.user_id !== userId) {
+        return {
+          message: "댓글 작성자만 댓글을 수정할 수 있습니다.",
+          statusCode: StatusCodes.FORBIDDEN,
+        };
+      }
+
+      // 댓글 내용 수정
+      await commentRepository.update(
+        { id: postId },
+        { content: comment } // 수정할 댓글 내용
+      );
+
+      // 수정된 댓글 정보 반환
+      const updatedComment = await commentRepository.findOne({
+        where: { id: postId },
+      });
+
+      return {
+        message: "댓글 수정 완료",
+        statusCode: StatusCodes.OK,
+        comment: {
+          id: postId,
+          content: updatedComment?.content,
+          created_at: updatedComment?.created_at,
+          updated_at: updatedComment?.updated_at,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "댓글 수정 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
+  static async deleteComment(postId: number, userId: number) {
+    const commentRepository = AppDataSource.getRepository(Comments);
+
+    try {
+      const userRepository = AppDataSource.getRepository(User);
+      const user = await userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        return {
+          message: "사용자를 찾을 수 없습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
+
+      // 해당 댓글을 먼저 조회하여 작성자 ID 확인
+      const existingComment = await commentRepository.findOne({
+        where: { id: postId },
+      });
+
+      if (!existingComment) {
+        return {
+          message: "수정할 댓글이 존재하지 않습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
+
+      // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
+      if (existingComment.user_id !== userId) {
+        return {
+          message: "댓글 작성자만 댓글을 삭제할 수 있습니다.",
+          statusCode: StatusCodes.FORBIDDEN,
+        };
+      }
+
+      const comment = await commentRepository.delete({
+        id: postId,
+        user: user,
+      });
+
+      return {
+        message: "댓글 삭제 완료",
+        statusCode: StatusCodes.OK ,
+        comment: {
+          id: postId,
+        },
+      };
+    } catch (error) {
+      return {
+        message: "댓글 삭제 중 오류가 발생했습니다.",
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
 }
