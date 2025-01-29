@@ -4,26 +4,27 @@ import {
   lookUpDetailTrips,
   editDetailTrips,
   removeDetailTrips,
-} from "../controller/detail.schedule.controller";
+} from "../controllers/detail.schedule.controller";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const router: Router = Router(); 
 
 // 세부 일정 조회
-router.get("/:tripId", (req: Request, res: Response) =>
+router.get("/:tripId", authMiddleware, (req: Request, res: Response) =>
   lookUpDetailTrips(req, res)
 );
 
 // 세부 일정 추가
-router.post("/:tripId", (req: Request, res: Response) =>
+router.post("/:tripId", authMiddleware, (req: Request, res: Response) =>
   addDetailTrips(req, res)
 );
 
 // 세부 일정 수정
-router.put("/:tripId", (req: Request, res: Response) =>
+router.put("/:tripId/:activityId", authMiddleware, (req: Request, res: Response) =>
   editDetailTrips(req, res)
 ); 
 // 세부 일정 삭제
-router.delete("/:tripId", (req: Request, res: Response) =>
+router.delete("/:tripId/:activityId", authMiddleware, (req: Request, res: Response) =>
   removeDetailTrips(req, res)
 );
 

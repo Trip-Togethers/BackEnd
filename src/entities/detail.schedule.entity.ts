@@ -29,7 +29,7 @@ export class Detaile {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @ManyToOne(() => Schedule, (schedule) => schedule.details)
+  @ManyToOne(() => Schedule, (schedule) => schedule.details, { onDelete: "CASCADE"})
   @JoinColumn({ name: 'schedule_id' })
   schedule!: Schedule;
 }

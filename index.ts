@@ -4,7 +4,8 @@ import AppDataSource from "./src/data-source";
 import mainPageRouter from './src/routes/schedule'
 import detailPageRouter from './src/routes/detail.schedule'
 import guestPageRouter from './src/routes/guest'
-
+import authRoutes from './src/routes/auth.routes'
+import userRoutes from './src/routes/user.routes'
 
 // dotenv 모듈 로드
 dotenv.config();
@@ -37,7 +38,11 @@ AppDataSource.initialize()
   });
 
 // 라우터 설정
+app.use('/users', authRoutes);
+app.use('/users', userRoutes);
 app.use("/trips", mainPageRouter);
 app.use("/trips/activities", detailPageRouter)
 app.use("/trips/companions", guestPageRouter)
 app.use('/uploads', express.static('uploads'));
+
+
