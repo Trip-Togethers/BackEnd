@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import AppDataSource from "./src/data-source";
 import mainPageRouter from './src/routes/schedule'
+import detailPageRouter from './src/routes/detail.schedule'
+import guestPageRouter from './src/routes/guest'
 import authRoutes from './src/routes/auth.routes'
 import userRoutes from './src/routes/user.routes'
 
@@ -39,3 +41,8 @@ AppDataSource.initialize()
 app.use('/users', authRoutes);
 app.use('/users', userRoutes);
 app.use("/trips", mainPageRouter);
+app.use("/trips/activities", detailPageRouter)
+app.use("/trips/companions", guestPageRouter)
+app.use('/uploads', express.static('uploads'));
+
+

@@ -30,6 +30,11 @@ export const uploadParams = async (filePath: string, fileName: string) => {
 
     const data = await upload.done();
     console.log("파일 업로드 성공:", data);
+
+    // 업로드 완료 후 로컬 파일 삭제
+    fs.unlinkSync(filePath); // 로컬 파일 삭제
+    console.log("로컬 파일 삭제 완료");
+
   } catch (err) {
     console.error("파일 업로드 실패:", err);
   }

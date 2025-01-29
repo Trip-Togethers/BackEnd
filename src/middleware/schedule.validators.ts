@@ -1,13 +1,5 @@
 import { body, header } from "express-validator";
 
-export const validateLookupTrips = [
-     body("email")
-        .notEmpty()
-        .withMessage("이메일을 입력해주세요.")
-        .isEmail()
-        .withMessage("유효한 이메일을 입력해 주세요")
-]
-
 export const validateAddTrip = [
      body("title")
         .notEmpty()

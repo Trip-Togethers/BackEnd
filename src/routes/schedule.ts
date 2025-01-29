@@ -2,7 +2,8 @@ import { Router, Request, Response } from "express";
 import {
   addTrips,
   removeTrips,
-  loopUpTrips
+  loopUpTrips,
+  editTrips,
 } from "../controllers/schedule.controller";
 import { upload } from "../middleware/multer.config";
 import { authMiddleware } from "../middleware/auth.middleware";
@@ -19,5 +20,7 @@ router.post("/", authMiddleware, upload.single("image"), (req: Request, res: Res
 // 여행 일정 삭제
 router.delete("/:tripId", authMiddleware, (req: Request, res: Response) => removeTrips(req, res));
 
+// 여행 일정 수정
+router.put("/:tripId", authMiddleware, upload.single("image"), (req: Request, res: Response) => editTrips(req, res));
 
 export default router;
