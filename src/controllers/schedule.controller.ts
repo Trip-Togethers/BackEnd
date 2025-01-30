@@ -104,14 +104,17 @@ export const addTrips = async (req: Request, res: Response) => {
 
   // 제목, 목적지, 기간 (시작일, 종료일)
   const { title, destination, startDate, endDate } = req.body;
-  const photoFilePath = handleFileUpload(req);
+  const putStartDate = new Date(startDate);
+  const putEndDate = new Date(endDate);
+
   const email = (req as any).user.email;
   const owner = (req as any).user.userId;
-  const photoUrl = photoFilePath ? photoFilePath : "";
 
-  if (photoFilePath && req.file?.path) {
+  let imageUrl;
+
+  if (req.file?.path) {
     try {
-      await uploadParams(req.file?.path, req.file?.filename);
+      imageUrl = await uploadParams(req.file?.path, req.file?.filename);
     } catch (error) {
       console.error("파일 업로드 실패:", error);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -122,14 +125,16 @@ export const addTrips = async (req: Request, res: Response) => {
     }
   }
 
+  imageUrl = imageUrl || ''; 
+
   try {
     await insertSchedule(
       title,
       destination,
-      startDate,
-      endDate,
+      putStartDate,
+      putEndDate,
       email,
-      photoUrl,
+      imageUrl,
       owner
     );
     res.status(StatusCodes.OK).json({
@@ -171,6 +176,19 @@ export const removeTrips = async (req: Request, res: Response) => {
     const userRepository = AppDataSource.getRepository(User);
     const guestRepository = AppDataSource.getRepository(Guest);
 
+    // 일정 조회
+    const schedule = await scheduleRepository.findOne({
+      where: { id: tripId },
+    });
+
+    // 일정이 존재하지 않으면 에러
+    if (!schedule) {
+       res.status(StatusCodes.NOT_FOUND).json({
+        message: "해당 일정이 존재하지 않습니다.",
+      });
+      return;
+    }
+    
     // 이메일로 사용자 조회
     const user = await userRepository.findOne({
       where: { email: email },
@@ -183,22 +201,22 @@ export const removeTrips = async (req: Request, res: Response) => {
       return;
     }
 
-    // 초대자인 경우: 사용자 본인이 소유한 일정 찾기
-    let schedule = await scheduleRepository.findOne({
-      where: {
-        id: tripId,
-        owner: userId,
-      },
-    });
+    // 초대자인 경우: 일정의 소유자가 일정을 삭제할 수 있음
+    if (schedule.owner === userId) {
+      await scheduleRepository.delete(tripId);
 
-    // 동행자인 경우: 동행자 초대받은 일정 찾기
-    if (!schedule) {
-      const guest = await guestRepository.findOne({
-        where: {
-          email: email,
-        },
-        relations: ["schedule"], // 동행자 일정 정보 가져오기
+       res.status(StatusCodes.OK).json({
+        message: "일정이 성공적으로 삭제되었습니다.",
       });
+      return;
+    }
+    // 동행자인 경우: 초대받은 일정만 삭제 가능
+    const guest = await guestRepository.findOne({
+      where: {
+        email: email,
+      },
+      relations: ["schedule"],
+    });
 
       // 동행자가 초대받은 일정이 없으면 에러
       if (!guest) {
@@ -208,43 +226,24 @@ export const removeTrips = async (req: Request, res: Response) => {
         return;
       }
 
-      schedule = guest.schedule; // 동행자가 초대받은 일정으로 설정
-
-      // 동행자는 본인만의 일정 삭제 권한이 있으므로,
-      // 일정을 삭제할 경우 guest 테이블에서만 삭제
-      await guestRepository.delete({
-        email: email,
-        schedule: { id: tripId }, // 해당 일정 삭제
-      });
-
-      // 모든 동행자에서 해당 일정 삭제
-      await guestRepository.delete({
-        schedule: { id: tripId }, // 해당 일정에 초대된 모든 동행자 삭제
-      });
+      if (!guest || guest.schedule.id !== tripId) {
+         res.status(StatusCodes.FORBIDDEN).json({
+          message: "초대받지 않은 일정을 삭제할 수 없습니다.",
+        });
+        return;
+      }
+      
+      // 동행자만 해당 일정 삭제
+    await guestRepository.delete({
+      email: email,
+      schedule: { id: tripId },
+    });
 
       res.status(StatusCodes.OK).json({
         message: "동행자의 일정 삭제가 완료되었습니다.",
       });
 
       return;
-    }
-
-    if (schedule) {
-      // 일정 삭제
-      try {
-        await scheduleRepository.delete(tripId);
-
-        res.status(StatusCodes.OK).json({
-          message: "일정이 성공적으로 삭제되었습니다.",
-        });
-      } catch (err) {
-        const error = err as Error;
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          message: "일정 삭제 중 오류가 발생했습니다.",
-          error: error.message,
-        });
-      }
-    }
   } catch (findError) {
     console.error("일정 조회 중 오류 발생:", findError);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -262,20 +261,6 @@ export const editTrips = async (req: Request, res:Response) => {
 
   const photoFilePath = handleFileUpload(req);
   const photoUrl = photoFilePath ? photoFilePath : "";
-
-  if (photoFilePath && req.file?.path) {
-    try {
-      await uploadParams(req.file?.path, req.file?.filename);
-    } catch (error) {
-      console.error("파일 업로드 실패:", error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "파일 업로드 오류",
-        error,
-      });
-      return;
-    }
-  }
-
   const email = (req as any).user.email;
 
   try {
@@ -309,6 +294,20 @@ export const editTrips = async (req: Request, res:Response) => {
       return;
     }
 
+    
+  if (photoFilePath && req.file?.path) {
+    try {
+      await uploadParams(req.file?.path, req.file?.filename);
+    } catch (error) {
+      console.error("파일 업로드 실패:", error);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "파일 업로드 오류",
+        error,
+      });
+      return;
+    }
+  }
+  
     // 여행 일정 수정
     if (startDate) schedule.start_date = new Date(startDate);
     if (endDate) schedule.end_date = new Date(endDate);

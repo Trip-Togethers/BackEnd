@@ -278,29 +278,3 @@ export const removeDetailTrips = async (req: Request, res: Response) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "서버 오류" });
   }
 };
-
-const getUserAndSchedule = async (email: string, tripId: number) => {
-  // 초대자 또는 동행자 여부에 따라 일정 조회
-  let schedule;
-  const guestRepository = AppDataSource.getRepository(Guest);
-
-  // 동행자가 초대된 일정이 있는지 확인
-  const guest = await guestRepository.findOne({
-    where: { email: email, schedule: { id: tripId } },
-    relations: ["schedule"],
-  });
-
-  if (guest) {
-    // 동행자라면, 해당 동행자가 초대받은 일정 조회
-    schedule = guest.schedule;
-  } else {
-    // 초대자라면, 본인이 소유한 일정 조회
-    schedule = await getScheduleByIdAndUserEmail(tripId, email);
-  }
-
-  if (!schedule) {
-    return { error: { status: StatusCodes.NOT_FOUND, message: "일정을 찾을 수 없습니다." } };
-  }
-
-  return { schedule };
-};
