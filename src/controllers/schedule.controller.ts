@@ -335,7 +335,7 @@ export const editTrips = async (req: Request, res:Response) => {
 };
 
 // 경로 리턴해주는 함수
-const handleFileUpload = (req: Request): string | null => {
+export const handleFileUpload = (req: Request): string | null => {
   if (!req.file) {
     return null;
   }

@@ -1,4 +1,4 @@
-import { AppDataSource } from '../data-source';
+import AppDataSource from '../data-source';
 import { Maps } from '../entities/map.entity';
 import { GetCalendarByIdParams } from '../types/params.type';
 

@@ -1,14 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { Users } from './user.entity';
+import { User } from './user.entity';
 
 @Entity('maps')
 export class Maps {
     @PrimaryGeneratedColumn({ unsigned: true })
     id: number;
 
-    @ManyToOne(() => Users, (user) => user.id, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
-    user: Users;
+    user: User;
+    
     @Column({ type: 'int', unsigned: true })
     user_id: number;
 

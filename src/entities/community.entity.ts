@@ -16,7 +16,7 @@ export class Posts {
     @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
     post_title: string;
 
-    @Column()
+    @Column({ nullable: true })
     post_photo_url: string;
 
     @Column({ type: 'text', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })

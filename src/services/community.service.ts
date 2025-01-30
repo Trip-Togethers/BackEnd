@@ -81,26 +81,23 @@ export class CommunityServices {
   static async createPost(params: { [key: string]: any }) {
     const postRepository = AppDataSource.getRepository(Posts);
 
-    console.log(params);
     try {
       const newPost = new Posts();
       newPost.post_title = params.post_title;
-      newPost.post_photo_url = params.post_photo_url;
+      newPost.post_photo_url = params.imageUrl;
       newPost.post_content = params.post_content;
       newPost.user_id = params.userId;
       newPost.trip_id = params.trip_id;
 
-      const savedPost = await postRepository.save(newPost);
+      await postRepository.save(newPost);
       return {
         message: "게시글 작성 완료",
         statusCode: StatusCodes.OK,
-        post: savedPost,
       };
     } catch (error) {
       return {
         message: "게시글 작성 중 오류가 발생했습니다.",
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        error,
       };
     }
   }
@@ -136,7 +133,7 @@ export class CommunityServices {
       // 작성자 정보 가져오기
       const author = {
         name: post?.user?.nickname || "Unknown",
-        profile_picture: post?.user?.profile_picture || "",
+        profilePicture: post?.user?.profile_picture || "",
       };
 
       return {
@@ -149,7 +146,7 @@ export class CommunityServices {
           post_photo_url: post?.post_photo_url,
           author: {
             nick: author.name,
-            profile: author.profile_picture,
+            profile: author.profilePicture,
           },
           created_at: post?.created_at,
           updated_at: post?.updated_at,
@@ -165,11 +162,7 @@ export class CommunityServices {
     }
   }
 
-  static async updatePostById(
-    postId: number,
-    params: { [key: string]: any },
-    userId: number
-  ) {
+  static async updatePostById(params: { [key: string]: any }, postId: number, userId: number) {
     const postRepository = AppDataSource.getRepository(Posts);
 
     try {
@@ -231,7 +224,7 @@ export class CommunityServices {
         return {
           message:
             "삭제 권한이 없습니다. 다른 사용자의 게시글은 삭제할 수 없습니다.",
-            statusCode: StatusCodes.FORBIDDEN,
+          statusCode: StatusCodes.FORBIDDEN,
         };
       }
 
@@ -253,57 +246,52 @@ export class CommunityServices {
   }
 
   static async likePost(postId: number, userId: number) {
+    const postRepository = AppDataSource.getRepository(Posts);
     const likeRepository = AppDataSource.getRepository(Likes);
     try {
-      await likeRepository.insert({
-        post_id: postId,
-        user_id: userId,
+      // 1. 게시글 존재 여부 확인
+      const post = await postRepository.findOne({ where: { id: postId } });
+  
+      if (!post) {
+        return {
+          message: "해당 게시글을 찾을 수 없습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
+  
+      // 2. 사용자가 이미 좋아요를 눌렀는지 확인
+      const existingLike = await likeRepository.findOne({
+        where: { post_id: postId, user_id: userId },
       });
-      const likesCount = await likeRepository
-        .createQueryBuilder("likes")
-        .where("likes.post_id = :post_id", { post_id: postId })
-        .getCount();
-      return {
-        message: "좋아요 추가 완료",
-        statusCode: StatusCodes.OK,
-        post: {
-          id: postId,
-          likes: likesCount,
-        },
-      };
+  
+      if (existingLike) {
+        // 이미 좋아요를 눌렀다면 -> 좋아요 취소
+        await likeRepository.delete({ post_id: postId, user_id: userId });
+  
+        // 삭제 후 좋아요 수 갱신
+        const updatedLikes = await likeRepository.count({ where: { post_id: postId } });
+  
+        return {
+          message: "좋아요 취소 완료",
+          statusCode: StatusCodes.OK,
+          post: { id: postId, likes: updatedLikes },
+        };
+      } else {
+        // 좋아요 추가
+        await likeRepository.insert({ post_id: postId, user_id: userId });
+  
+        // 좋아요 수 갱신
+        const updatedLikes = await likeRepository.count({ where: { post_id: postId } });
+  
+        return {
+          message: "좋아요 추가 완료",
+          statusCode: StatusCodes.OK,
+          post: { id: postId, likes: updatedLikes },
+        };
+      }
     } catch (error) {
       return {
         message: "좋아요 추가 중 오류가 발생했습니다.",
-        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      };
-    }
-  }
-
-  static async unlikePost(postId: number, userId: number) {
-    const likeRepository = AppDataSource.getRepository(Likes);
-    try {
-      const unlike = await likeRepository.delete({
-        post_id: postId,
-        user_id: userId,
-      });
-      const likesCount = await likeRepository
-        .createQueryBuilder("likes")
-        .where("likes.post_id = :post_id", { post_id: postId })
-        .getCount();
-
-      return {
-        message: unlike.affected
-          ? "좋아요 삭제 완료"
-          : "삭제할 데이터가 없습니다.",
-          statusCode: unlike.affected ? StatusCodes.OK : StatusCodes.NOT_FOUND ,
-        post: {
-          id: postId,
-          likes: likesCount,
-        },
-      };
-    } catch (error) {
-      return {
-        message: "좋아요 삭제 중 오류가 발생했습니다.",
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       };
     }
@@ -411,13 +399,13 @@ export class CommunityServices {
     }
   }
 
-  static async updateComment(postId: number, userId: number, comment: string) {
+  static async updateComment(commentId: number, userId: number, comment: string) {
     const commentRepository = AppDataSource.getRepository(Comments);
 
     try {
       // 해당 댓글을 먼저 조회하여 작성자 ID 확인
       const existingComment = await commentRepository.findOne({
-        where: { id: postId },
+        where: { id: commentId },
       });
 
       if (!existingComment) {
@@ -437,20 +425,20 @@ export class CommunityServices {
 
       // 댓글 내용 수정
       await commentRepository.update(
-        { id: postId },
+        { id: commentId },
         { content: comment } // 수정할 댓글 내용
       );
 
       // 수정된 댓글 정보 반환
       const updatedComment = await commentRepository.findOne({
-        where: { id: postId },
+        where: { id: commentId },
       });
 
       return {
         message: "댓글 수정 완료",
         statusCode: StatusCodes.OK,
         comment: {
-          id: postId,
+          id: commentId,
           content: updatedComment?.content,
           created_at: updatedComment?.created_at,
           updated_at: updatedComment?.updated_at,
@@ -507,7 +495,7 @@ export class CommunityServices {
 
       return {
         message: "댓글 삭제 완료",
-        statusCode: StatusCodes.OK ,
+        statusCode: StatusCodes.OK,
         comment: {
           id: postId,
         },
