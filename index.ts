@@ -7,6 +7,7 @@ import guestPageRouter from './src/routes/guest'
 import authRoutes from './src/routes/auth.routes'
 import calendarRoutes from './src/routes/calendar.routes'
 import postsRouter from './src/routes/community.routes'
+import mapsRouter from './src/routes/maps.routes'
 import { TableType } from "typeorm/metadata/types/TableTypes.js";
 
 // dotenv 모듈 로드
@@ -46,6 +47,7 @@ app.use("/trips/activities", detailPageRouter)
 app.use("/trips/companions", guestPageRouter)
 app.use("/calendar", calendarRoutes)
 app.use("/posts", postsRouter)
+app.use("/maps", mapsRouter)
 app.use('/uploads', express.static('uploads'));
 
 
