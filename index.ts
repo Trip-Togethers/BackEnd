@@ -8,7 +8,6 @@ import calendarRoutes from './src/routes/calendar.routes'
 import postsRouter from './src/routes/community.routes'
 import authRoutes from './src/routes/auth.routes'
 import googleAuthRoutes from './src/auth/googleAuth.routes'
-import userRoutes from './src/routes/user.routes'
 import profileRoutes from './src/routes/profile.routes'
 import mapsRouter from './src/routes/maps.routes'
 import { TableType } from "typeorm/metadata/types/TableTypes.js";
@@ -46,7 +45,6 @@ AppDataSource.initialize()
 // 라우터 설정
 app.use('/users', authRoutes);                      // User
 app.use('/auth', googleAuthRoutes);
-app.use('/users', userRoutes);
 app.use('/profile', profileRoutes);
 app.use("/trips", mainPageRouter);                  // Schedule
 app.use("/trips/activities", detailPageRouter)      // DetailSchedule
