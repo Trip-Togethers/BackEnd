@@ -4,10 +4,8 @@ import session from 'express-session';
 import passport from 'passport';
 import dotenv from 'dotenv';
 
-// 환경 변수 로드
 dotenv.config();
 
-// Google OAuth 설정 파일 추가
 import './auth/googleAuth.strategy';
 
 // 라우트
