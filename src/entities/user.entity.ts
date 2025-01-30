@@ -4,7 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'typeorm';
+  DeleteDateColumn,
+  OneToMany,
+} from "typeorm";
+import { Posts } from "./community.entity";
+import { Schedule } from "./schedule.entity";
 
 @Entity()
 export class User {
@@ -31,4 +35,25 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @OneToMany(() => Schedule, (schedule) => schedule.user)
+  schedule?: Schedule[];
+
+  @Column()
+  profile_picture: string;
+
+  @Column()
+  contact: string;
+
+  @Column()
+  login_category: string;
+
+  @DeleteDateColumn({ type: "datetime", nullable: true })
+  deleted_at: Date;
+
+  @OneToMany(() => Posts, (post) => post.user)
+  posts: Posts[];
+
+  // @OneToMany(() => Participant, (participant) => participant.user)
+  // participant!: Participant[];
 }

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../services/auth.service';
+import { StatusCodes } from 'http-status-codes';
 
 const authService = new AuthService();
 
@@ -9,7 +10,7 @@ export class AuthController {
       const { email, password } = req.body;
       await authService.register(email, password);
 
-      res.status(201).json({
+      res.status(StatusCodes.OK).json({
         message: '회원가입 완료. 이메일 인증을 진행해주세요.',
       });
     } catch (error: any) {
@@ -22,10 +23,10 @@ export class AuthController {
       const { email, code } = req.body;
       const result = await authService.verifyEmail(email, code);
       if (!result) {
-        res.status(400).json({ message: '인증 코드가 올바르지 않습니다.' });
+        res.status(StatusCodes.BAD_REQUEST).json({ message: '인증 코드가 올바르지 않습니다.' });
         return;
       }
-      res.status(200).json({ message: '이메일 인증 완료' });
+      res.status(StatusCodes.OK).json({ message: '이메일 인증 완료' });
     } catch (error: any) {
       next(error);
     }
@@ -35,7 +36,7 @@ export class AuthController {
     try {
       const { email, password } = req.body;
       const token = await authService.login(email, password);
-      res.status(200).json({ message: '로그인 성공', token });
+      res.status(StatusCodes.OK).json({ message: '로그인 성공', token });
     } catch (error: any) {
       next(error);
     }
@@ -45,7 +46,7 @@ export class AuthController {
     try {
       const token = req.headers.authorization?.split(' ')[1] || '';
       await authService.logout(token);
-      res.status(200).json({ message: '로그아웃 되었습니다.' });
+      res.status(StatusCodes.OK).json({ message: '로그아웃 되었습니다.' });
     } catch (error: any) {
       next(error);
     }

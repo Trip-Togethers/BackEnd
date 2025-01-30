@@ -1,7 +1,17 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import AppDataSource from "./src/data-source";
-
+import mainPageRouter from './src/routes/schedule'
+import detailPageRouter from './src/routes/detail.schedule'
+import guestPageRouter from './src/routes/guest'
+import calendarRoutes from './src/routes/calendar.routes'
+import postsRouter from './src/routes/community.routes'
+import authRoutes from './src/routes/auth.routes'
+import googleAuthRoutes from './src/auth/googleAuth.routes'
+import userRoutes from './src/routes/user.routes'
+import profileRoutes from './src/routes/profile.routes'
+import mapsRouter from './src/routes/maps.routes'
+import { TableType } from "typeorm/metadata/types/TableTypes.js";
 
 // dotenv 모듈 로드
 dotenv.config();
@@ -17,10 +27,10 @@ AppDataSource.initialize()
     console.log("Database connected");
     // 데이터베이스에서 테이블 목록 가져오기
     AppDataSource.query("SHOW TABLES")
-      .then((tables) => {
+      .then((tables: TableType[]) => {
         console.log("Tables in the database:", tables);
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         console.error("Error fetching tables:", err);
       });
 
@@ -34,4 +44,15 @@ AppDataSource.initialize()
   });
 
 // 라우터 설정
-app.use('/uploads', express.static('uploads'));
+app.use('/users', authRoutes);                      // User
+app.use('/auth', googleAuthRoutes);
+app.use('/users', userRoutes);
+app.use('/profile', profileRoutes);
+app.use("/trips", mainPageRouter);                  // Schedule
+app.use("/trips/activities", detailPageRouter)      // DetailSchedule
+app.use("/trips/companions", guestPageRouter)       // Guest
+app.use("/calendar", calendarRoutes)                // Calendar
+app.use("/posts", postsRouter)                      // Post
+app.use("/maps", mapsRouter)                        // Map
+
+
