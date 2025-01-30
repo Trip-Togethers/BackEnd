@@ -1,48 +1,33 @@
-import { AppDataSource } from '../data-source';
-import { Trips, TripDetail, Participant } from '../entities/calendar.entity';
-import { GetCalendarByIdParams } from '../types/params.type';
+import AppDataSource from "../data-source";
+import { Guest } from "../entities/guest.entity";
+import { Schedule } from "../entities/schedule.entity";
 
 export class calendarServices {
-    static async getCalendar(params: GetCalendarByIdParams) {
-        const user_id = Number(params.user_id);
+  static async getCalendar(userId: number) {
+    
+    try {
+      // 초대자일 경우 (일정의 owner)
+      const ownerSchedules = await AppDataSource.getRepository(Schedule).find({
+        where: { owner: userId },
+        relations: ["details"], // 동행자 정보도 가져오기
+      });
 
-        const calendarRepository = AppDataSource.getRepository(Participant);
-        const tripDetailRepository = AppDataSource.getRepository(TripDetail);
+      // 동행자일 경우 (guests에 본인 이메일이 포함된 일정)
+      const guestSchedules = await AppDataSource.getRepository(Guest).find({
+        where: { user_id: userId },
+        relations: ["schedule"],
+      });
 
-        const participants = await calendarRepository.find({
-            relations: ['tripId'],
-            where: { user_id: user_id },
-        });
+      // 초대자 일정과 동행자 일정 합치기
+      const allSchedules = [
+        ...ownerSchedules, // 초대자의 일정
+        ...guestSchedules.map((guest) => guest.schedule), // 동행자의 일정
+      ];
 
-        const trips = await Promise.all(
-            participants.map(async (participant) => {
-                const trip = participant.tripId;
-
-                const tripDetails = await tripDetailRepository.find({
-                    where: { trip_id: trip.trip_id },
-                });
-
-                const schedules = tripDetails.map((detail) => ({
-                    title: detail.schedule_title,
-                    date: detail.schedule_time,
-                }));
-
-                return {
-                    id: trip.trip_id,
-                    title: trip.title,
-                    destination: trip.destination,
-                    photo_url: trip.photo_url,
-                    start_date: trip.start_date,
-                    end_date: trip.end_date,
-                    schedules: schedules,
-                };
-            })
-        );
-
-        return {
-            success: true,
-            message: '일정 정보 불러오기 완료',
-            trips: trips,
-        };
+      return allSchedules;
+    } catch (error) {
+      console.error(error);
+      throw new Error("일정 데이터를 가져오는 중 오류가 발생했습니다.");
     }
+  }
 }

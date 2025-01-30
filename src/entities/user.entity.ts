@@ -1,38 +1,56 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
-import { Posts } from './community.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+} from "typeorm";
+import { Posts } from "./community.entity";
+import { Schedule } from "./schedule.entity";
 
-@Entity('users')
-export class Users {
-    @PrimaryGeneratedColumn({ unsigned: true })
-    id: number;
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    email: string;
+  @Column({ unique: true })
+  email!: string;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    password: string;
+  @Column()
+  password!: string;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    name: string;
+  @Column({ default: false })
+  isVerified!: boolean;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    profile_picture: string;
+  @Column({ nullable: true })
+  nickname?: string;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    contact: string;
+  @CreateDateColumn()
+  createdAt!: Date;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    login_category: string;
+  @UpdateDateColumn()
+  updatedAt!: Date;
 
-    @DeleteDateColumn({ type: 'datetime', nullable: true })
-    deleted_at: Date;
+  @OneToMany(() => Schedule, (schedule) => schedule.user)
+  schedule?: Schedule[];
 
-    @CreateDateColumn({ type: 'datetime' })
-    created_at: Date;
+  @Column()
+  profile_picture: string;
 
-    @UpdateDateColumn({ type: 'datetime', nullable: true })
-    updated_at: Date | null;
+  @Column()
+  contact: string;
 
-    @OneToMany(() => Posts, (post) => post.user_id)
-    posts: Posts[];
+  @Column()
+  login_category: string;
+
+  @DeleteDateColumn({ type: "datetime", nullable: true })
+  deleted_at: Date;
+
+  @OneToMany(() => Posts, (post) => post.user)
+  posts: Posts[];
+
+  // @OneToMany(() => Participant, (participant) => participant.user)
+  // participant!: Participant[];
 }

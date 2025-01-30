@@ -1,15 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { Users } from './user.entity';
+import { User } from './user.entity';
 
 @Entity('posts')
 export class Posts {
     @PrimaryGeneratedColumn({ unsigned: true })
     id: number;
 
-    @ManyToOne(() => Users, (user) => user.id, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
-    @Column({ type: 'int', unsigned: true })
-    user_id: Users;
+    user: User;
 
     @Column({ type: 'int' })
     trip_id: number;
@@ -17,7 +16,7 @@ export class Posts {
     @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
     post_title: string;
 
-    @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
+    @Column()
     post_photo_url: string;
 
     @Column({ type: 'text', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
@@ -34,6 +33,9 @@ export class Posts {
 
     @OneToMany(() => Likes, (like) => like.post_id)
     likes: Likes[];
+
+    @Column()
+    user_id: number;
 }
 
 @Entity('comments')
@@ -43,14 +45,14 @@ export class Comments {
 
     @ManyToOne(() => Posts, (post) => post.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'post_id' })
-    @Column({ type: 'int', unsigned: true })
-    post_id: number;
+    post_id!: number;
 
-    @ManyToOne(() => Users, (user) => user.id, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
-    user: Users
-    @Column({ type: 'int', unsigned: true })
-    user_id: number;
+    user: User
+
+    @Column()
+    user_id!: number;
 
     @Column({ type: 'text', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
     content: string;
@@ -69,12 +71,10 @@ export class Likes {
 
     @ManyToOne(() => Posts, (post) => post.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'post_id' })
-    @Column({ type: 'int', unsigned: true })
     post_id: number;
 
-    @ManyToOne(() => Users, (user) => user.id, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
-    @Column({ type: 'int', unsigned: true })
     user_id: number;
 
     @CreateDateColumn({ type: 'datetime' })
