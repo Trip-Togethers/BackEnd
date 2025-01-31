@@ -1,4 +1,4 @@
-import { body, header } from "express-validator";
+import { body } from "express-validator";
 
 export const validateAddTrip = [
      body("title")

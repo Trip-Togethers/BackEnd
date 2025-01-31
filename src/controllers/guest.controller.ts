@@ -6,9 +6,18 @@ import AppDataSource from "../data-source";
 import { Guest } from "../entities/guest.entity";
 import { Schedule } from "../entities/schedule.entity";
 import { User } from "../entities/user.entity";
+import { validateInvite, validateRemoveGuest, validateTripId } from "../middleware/guest.validators";
+import { validationResult } from "express-validator";
 
 // 동행자 추가
 export const addGuestToSchedule = async (req: Request, res: Response) => {
+  await Promise.all(validateInvite.map((validator) => validator.run(req)));
+  const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       res.status(400).json({ errors: errors.array() });
+       return;
+    }
+
   const { tripId, userId } = req.params; // 여행아이디, 초대자아이디
   const guestId = (req as any).user.userId; // 동행자 아이디
   const email = (req as any).user.email;
@@ -26,17 +35,17 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     // 초대 링크에 해당하는 동행자 정보 조회
     const guest = await guestRepository.findOne({
       where: {
-        userId: Number(userId), // 초대자 ID
-        schedule: { id: Number(tripId) }, // 여행 일정
+        userId: Number(userId), 
+        schedule: { id: Number(tripId) }, 
       },
-      relations: ["schedule"], // 여행 일정 정보도 가져오기
+      relations: ["schedule"], 
     });
 
     // 이미 동행자로 추가된 유저인지 확인
     const existingGuest = await guestRepository.findOne({
       where: {
-        userId: guestId, // 이미 추가된 동행자 여부
-        schedule: { id: Number(tripId) }, // 해당 여행 일정에 추가되어 있는지
+        userId: guestId,
+        schedule: { id: Number(tripId) },
       },
     });
 
@@ -65,7 +74,7 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     }
     // 동행자 추가: 수락 시점 설정
     guest.acceptedAt = new Date(); // 초대 수락 시각
-    guest.userId = guestId; // 동행자 ID 설정
+    guest.userId = guestId;
     guest.email = email;
     guest.schedule = mainSchedule;
 
@@ -92,11 +101,33 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
 
 // 초대 링크 생성
 export const createInviteLink = async (req: Request, res: Response) => {
+  
+  await Promise.all(validateTripId.map((validator) => validator.run(req)));
+  const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       res.status(400).json({ errors: errors.array() });
+       return;
+    }
+
   const { tripId } = req.params;
   const userId = (req as any).user.userId;
   const email = (req as any).user.email;
 
   try {
+    const scheduleRepository = AppDataSource.getRepository(Schedule);
+    const schedule = await scheduleRepository.findOne({
+      where: {
+        id: Number(tripId),
+      },
+    });
+
+    if (!schedule) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "일정을 찾을 수 없습니다.",
+      });
+      return;
+    }
+
     const inviteCode = crypto.randomBytes(16).toString("hex");
     console.log(tripId, userId, inviteCode);
     await insertInviteLink(Number(tripId), userId, inviteCode, email);
@@ -116,6 +147,13 @@ export const createInviteLink = async (req: Request, res: Response) => {
 
 // 동행자 삭제
 export const removeGuestToSchedule = async (req: Request, res: Response) => {
+  await Promise.all(validateRemoveGuest.map((validator) => validator.run(req)));
+  const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       res.status(400).json({ errors: errors.array() });
+       return;
+    }
+
   const { tripId, guestId } = req.params;
   const userId = (req as any).user.userId;
 
@@ -163,6 +201,13 @@ export const removeGuestToSchedule = async (req: Request, res: Response) => {
 
 // 목록 조회
 export const lookUpUserList = async (req: Request, res: Response) => {
+  await Promise.all(validateRemoveGuest.map((validator) => validator.run(req)));
+  const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+       res.status(400).json({ errors: errors.array() });
+       return;
+    }
+
   const { tripId } = req.params;
 
   try {

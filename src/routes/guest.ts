@@ -6,6 +6,7 @@ import {
 } from "../controllers/guest.controller";
 import { addGuestToSchedule } from "../controllers/guest.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { validateInvite } from "../middleware/guest.validators";
 
 const router: Router = Router();
 
