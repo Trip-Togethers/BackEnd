@@ -5,20 +5,15 @@ import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
 import { validationResult } from "express-validator";
 import { uploadParams } from "../middleware/multer.config";
-import { validateAddTrip } from "../middleware/schedule.validators";
+import { validateAddTrip, validateDeleteTripId, validateEditTrip } from "../middleware/schedule.validators";
 import { error } from "console";
 import { User } from "../entities/user.entity";
 import { Guest } from "../entities/guest.entity";
 import { getScheduleByIdAndUserEmail, getUserByEmail } from "../services/detail.schedul.service";
+import { validateTripId } from "../middleware/guest.validators";
 
 // 여행 일정 조회
 export const loopUpTrips = async (req: Request, res: Response) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
-    return;
-  }
-
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -150,6 +145,17 @@ export const addTrips = async (req: Request, res: Response) => {
 
 // 여행 일정 삭제
 export const removeTrips = async (req: Request, res: Response) => {
+  await Promise.all(validateDeleteTripId.map((validator) => validator.run(req)));
+
+  // 유효성 검사 결과 확인
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      errors: errors.array(),
+    });
+    return;
+  }
+
   const tripId = Number(req.params.tripId);
   const authHeader = req.headers.authorization;
 
@@ -256,6 +262,17 @@ export const removeTrips = async (req: Request, res: Response) => {
 
 // 여행 일정 수정
 export const editTrips = async (req: Request, res:Response) => {
+  await Promise.all(validateEditTrip.map((validator) => validator.run(req)));
+
+  // 유효성 검사 결과 확인
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      errors: errors.array(),
+    });
+    return;
+  }
+
   const tripId = Number(req.params.tripId);
   const { startDate, endDate, title, description } = req.body;
 
