@@ -309,11 +309,11 @@ export const editTrips = async (req: Request, res:Response) => {
   }
   
     // 여행 일정 수정
-    if (startDate) schedule.start_date = new Date(startDate);
-    if (endDate) schedule.end_date = new Date(endDate);
+    if (startDate) schedule.startDate = new Date(startDate);
+    if (endDate) schedule.endDate = new Date(endDate);
     if (title) schedule.title = title;
     if (description) schedule.destination = description;
-    if (photoUrl) schedule.photo_url = photoUrl;
+    if (photoUrl) schedule.photoUrl = photoUrl;
 
     // 수정된 일정 저장
     await AppDataSource.getRepository(Schedule).save(schedule);
@@ -322,8 +322,8 @@ export const editTrips = async (req: Request, res:Response) => {
       message: "여행 일정이 성공적으로 수정되었습니다.",
       schedule: {
         id: schedule.id,
-        startDate: schedule.start_date,
-        endDate: schedule.end_date,
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
         title: schedule.title,
         description: schedule.destination,
       },

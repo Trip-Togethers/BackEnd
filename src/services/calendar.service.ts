@@ -14,7 +14,7 @@ export class calendarServices {
 
       // 동행자일 경우 (guests에 본인 이메일이 포함된 일정)
       const guestSchedules = await AppDataSource.getRepository(Guest).find({
-        where: { user_id: userId },
+        where: { userId: userId },
         relations: ["schedule"],
       });
 

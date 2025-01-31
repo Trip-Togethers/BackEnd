@@ -17,7 +17,7 @@ export class Posts {
     post_title: string;
 
     @Column({ nullable: true })
-    post_photo_url: string;
+    post_photoUrl: string;
 
     @Column({ type: 'text', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
     post_content: string;

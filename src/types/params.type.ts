@@ -5,7 +5,7 @@ export interface GetPostByIdParams {
 export interface UpdatePostBody {
   post_title?: string;
   post_content?: string;
-  post_photo_url?: string;
+  post_photoUrl?: string;
 }
 
 export interface addCommentToPostBody {

@@ -26,7 +26,7 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     // 초대 링크에 해당하는 동행자 정보 조회
     const guest = await guestRepository.findOne({
       where: {
-        user_id: Number(userId), // 초대자 ID
+        userId: Number(userId), // 초대자 ID
         schedule: { id: Number(tripId) }, // 여행 일정
       },
       relations: ["schedule"], // 여행 일정 정보도 가져오기
@@ -35,7 +35,7 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     // 이미 동행자로 추가된 유저인지 확인
     const existingGuest = await guestRepository.findOne({
       where: {
-        user_id: guestId, // 이미 추가된 동행자 여부
+        userId: guestId, // 이미 추가된 동행자 여부
         schedule: { id: Number(tripId) }, // 해당 여행 일정에 추가되어 있는지
       },
     });
@@ -64,8 +64,8 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
       return;
     }
     // 동행자 추가: 수락 시점 설정
-    guest.accepted_at = new Date(); // 초대 수락 시각
-    guest.user_id = guestId; // 동행자 ID 설정
+    guest.acceptedAt = new Date(); // 초대 수락 시각
+    guest.userId = guestId; // 동행자 ID 설정
     guest.email = email;
     guest.schedule = mainSchedule;
 
@@ -76,10 +76,10 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     res.status(StatusCodes.OK).json({
       message: "동행자가 여행 일정에 성공적으로 추가되었습니다.",
       guest: {
-        userId: guest.user_id,
+        userId: guest.userId,
         email: email,
-        inviteCode: guest.invite_code,
-        acceptedAt: guest.accepted_at,
+        inviteCode: guest.inviteCode,
+        acceptedAt: guest.acceptedAt,
       },
     });
   } catch (error) {
@@ -125,7 +125,7 @@ export const removeGuestToSchedule = async (req: Request, res: Response) => {
     // 삭제하려는 동행자 정보 조회
     const guest = await guestRepository.findOne({
       where: {
-        user_id: Number(guestId), // 삭제하려는 동행자 ID
+        userId: Number(guestId), // 삭제하려는 동행자 ID
         schedule: { id: Number(tripId) }, // 해당 여행 일정
       },
       relations: ["schedule"], // 여행 일정도 함께 로드
@@ -195,7 +195,7 @@ export const lookUpUserList = async (req: Request, res: Response) => {
       ...schedule.guests.map((guest) => ({
         guest: guest.email,
         role: "guest",
-        id: guest.user_id,
+        id: guest.userId,
       })),
     ];
 

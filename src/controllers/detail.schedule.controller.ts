@@ -56,8 +56,8 @@ export const lookUpDetailTrips = async (req: Request, res: Response) => {
       return;
     }
 
-    const startDate = new Date(schedule.start_date);
-    const endDate = new Date(schedule.end_date);
+    const startDate = new Date(schedule.startDate);
+    const endDate = new Date(schedule.endDate);
     const dateList = generateFormattedDates(startDate, endDate);
 
     const detailScheduleRepository = AppDataSource.getRepository(Detaile);
@@ -117,8 +117,8 @@ export const addDetailTrips = async (req: Request, res: Response) => {
       return;
     }
 
-    const startDate = new Date(schedule.start_date);
-    const endDate = new Date(schedule.end_date);
+    const startDate = new Date(schedule.startDate);
+    const endDate = new Date(schedule.endDate);
     const inputDate = new Date(utcScheduleDate);
 
     if (!checkDateInRange(inputDate, startDate, endDate)) {
@@ -179,8 +179,8 @@ export const editDetailTrips = async (req: Request, res: Response) => {
       return;
     }
 
-    const startDate = new Date(schedule.start_date);
-    const endDate = new Date(schedule.end_date);
+    const startDate = new Date(schedule.startDate);
+    const endDate = new Date(schedule.endDate);
     const inputDate = new Date(utcScheduleDate);
 
     if (!checkDateInRange(inputDate, startDate, endDate)) {
@@ -201,13 +201,13 @@ export const editDetailTrips = async (req: Request, res: Response) => {
     }
 
     if (scheduleDate) {
-      detailSchedules.schedule_date = utcScheduleDate;
+      detailSchedules.scheduleDate = utcScheduleDate;
     }
     if (scheduleTime) {
-      detailSchedules.schedule_time = scheduleTime;
+      detailSchedules.scheduleTime = scheduleTime;
     }
     if (scheduleContent) {
-      detailSchedules.schedule_content = scheduleContent;
+      detailSchedules.scheduleContent = scheduleContent;
     }
 
     await detailScheduleRepository.save(detailSchedules);
@@ -215,9 +215,9 @@ export const editDetailTrips = async (req: Request, res: Response) => {
     res.status(StatusCodes.OK).json({
       message: "세부 일정이 성공적으로 수정되었습니다.",
       id: detailSchedules.id,
-      updatedDate: detailSchedules.schedule_date,
-      updatedTime: detailSchedules.schedule_time,
-      updatedContent: detailSchedules.schedule_content,
+      updatedDate: detailSchedules.scheduleDate,
+      updatedTime: detailSchedules.scheduleTime,
+      updatedContent: detailSchedules.scheduleContent,
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "서버 오류" });

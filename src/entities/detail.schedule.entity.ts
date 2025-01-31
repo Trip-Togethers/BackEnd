@@ -13,21 +13,21 @@ export class Detaile {
   @PrimaryGeneratedColumn()
   id!: number; 
    
-  @Column()
-  schedule_date!: Date;
+  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  scheduleDate: Date;
 
   @Column({type: "time"})
-  schedule_time!: string;
+  scheduleTime!: string;
 
   @Column()
-  schedule_content!: string;
+  scheduleContent!: string;
 
   @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
-  created_at!: Date;
+  createdAt!: Date;
 
   @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
   @UpdateDateColumn()
-  updated_at!: Date;
+  updatedAt!: Date;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.details, { onDelete: "CASCADE"})
   @JoinColumn({ name: 'schedule_id' })

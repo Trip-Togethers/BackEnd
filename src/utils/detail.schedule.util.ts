@@ -23,7 +23,7 @@ export const findDetailedSchedules = (
   return detaList.map((currentDate) => {
     const currentDateObj = parseISO(`${currentDate}T00:00:00`);
     const matchingDates = detailedSchedule.filter((details) => {
-      const scheduleDate = details.schedule_date;
+      const scheduleDate = details.scheduleDate;
       return isSameDay(scheduleDate, currentDateObj);
     });
     return {

@@ -7,19 +7,19 @@ export class Guest {
   id!: number;
   
   @Column()
-  user_id!: number; // 동행자의 사용자 ID
+  userId!: number; // 동행자의 사용자 ID
 
   @Column()
   email!: string;
   
   @Column()
-  invite_code!: string;
+  inviteCode!: string;
 
   @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
-  invited_at!: Date; // 초대 링크 생성 시점
+  invitedAt!: Date; // 초대 링크 생성 시점
 
   @Column({ type: 'datetime', nullable: true })
-  accepted_at!: Date | null; // 동행자가 초대를 수락한 시점
+  acceptedAt!: Date | null; // 동행자가 초대를 수락한 시점
 
   @ManyToOne(() => Schedule, (schedule) => schedule.guests, {onDelete: "CASCADE"})
   @JoinColumn({ name: 'schedule_id' })

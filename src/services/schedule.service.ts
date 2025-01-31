@@ -6,10 +6,10 @@ import { User } from "../entities/user.entity";
 export const insertSchedule = async (
   title: string,
   destination: string,
-  start_date: Date,
-  end_date: Date,
+  startDate: Date,
+  endDate: Date,
   email: string,
-  photo_url: string,
+  photoUrl: string,
   owner: number
 ) => { 
   const scheduleRepository = AppDataSource.getRepository(Schedule);
@@ -28,10 +28,10 @@ export const insertSchedule = async (
   const newSchedule = new Schedule();
   newSchedule.title = title;
   newSchedule.destination = destination;
-  newSchedule.start_date = start_date;
-  newSchedule.end_date = end_date;
+  newSchedule.startDate = startDate;
+  newSchedule.endDate = endDate;
   newSchedule.user = user;
-  newSchedule.photo_url = photo_url;
+  newSchedule.photoUrl = photoUrl;
   newSchedule.owner = owner
 
   // 데이터 베이스에 저장

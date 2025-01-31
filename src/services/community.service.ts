@@ -84,7 +84,7 @@ export class CommunityServices {
     try {
       const newPost = new Posts();
       newPost.post_title = params.post_title;
-      newPost.post_photo_url = params.imageUrl;
+      newPost.post_photoUrl = params.imageUrl;
       newPost.post_content = params.post_content;
       newPost.user_id = params.userId;
       newPost.trip_id = params.trip_id;
@@ -143,7 +143,7 @@ export class CommunityServices {
           id: postId,
           post_title: post?.post_title,
           post_content: post?.post_content,
-          post_photo_url: post?.post_photo_url,
+          post_photoUrl: post?.post_photoUrl,
           author: {
             nick: author.name,
             profile: author.profilePicture,
@@ -193,7 +193,7 @@ export class CommunityServices {
           id: postId,
           post_title: post?.post_title,
           post_content: post?.post_content,
-          post_photo_url: post?.post_photo_url,
+          post_photoUrl: post?.post_photoUrl,
           updated_at: post?.updated_at,
         },
       };

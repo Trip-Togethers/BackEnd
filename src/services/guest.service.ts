@@ -15,7 +15,7 @@ export const insertInviteLink = async (
   
   const existingCode = await inviteLinkRepository.findOne({
     where: {
-      invite_code: inviteCode,
+      inviteCode: inviteCode,
     },
   });
 
@@ -34,9 +34,9 @@ export const insertInviteLink = async (
   // 새 초대 링크 객체 생성
   const newGuestInviteLink = new Guest();
   newGuestInviteLink.schedule = schedule;
-  newGuestInviteLink.user_id = userId;
-  newGuestInviteLink.invite_code = inviteCode;
-  newGuestInviteLink.invited_at = new Date();
+  newGuestInviteLink.userId = userId;
+  newGuestInviteLink.inviteCode = inviteCode;
+  newGuestInviteLink.invitedAt = new Date();
   newGuestInviteLink.email = email
 
   // 데이터베이스에 저장
