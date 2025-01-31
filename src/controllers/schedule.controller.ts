@@ -10,7 +10,6 @@ import { error } from "console";
 import { User } from "../entities/user.entity";
 import { Guest } from "../entities/guest.entity";
 import { getScheduleByIdAndUserEmail, getUserByEmail } from "../services/detail.schedul.service";
-import { validateTripId } from "../middleware/guest.validators";
 
 // 여행 일정 조회
 export const loopUpTrips = async (req: Request, res: Response) => {

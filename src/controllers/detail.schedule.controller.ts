@@ -9,14 +9,26 @@ import {
   generateFormattedDates,
 } from "../utils/detail.schedule.util";
 import {
-  validateDetailTrip,
+  validateAddTrip,
   validateEditDetailTrip,
   validateRemoveDetailTrip,
+  validateTripId,
 } from "../middleware/detail.schedule.validators";
 import { Guest } from "../entities/guest.entity";
+import { validationResult } from "express-validator";
 
 // 세부 일정 조회
 export const lookUpDetailTrips = async (req: Request, res: Response) => {
+  await Promise.all(validateTripId.map((validator) => validator.run(req)));
+  
+    // 유효성 검사 결과 확인
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        errors: errors.array(),
+      });
+      return;
+    }
   const tripId = Number(req.params.tripId);
   const email = (req as any).user.email;
 
@@ -78,7 +90,15 @@ export const lookUpDetailTrips = async (req: Request, res: Response) => {
 
 // 세부 일정 추가
 export const addDetailTrips = async (req: Request, res: Response) => {
-  await Promise.all(validateDetailTrip.map((validate) => validate.run(req)));
+  await Promise.all(validateAddTrip.map((validate) => validate.run(req)));
+
+  const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        errors: errors.array(),
+      });
+      return;
+    }
 
   const tripId = Number(req.params.tripId);
   const { scheduleDate, scheduleTime, scheduleContent } = req.body;
@@ -141,6 +161,13 @@ export const addDetailTrips = async (req: Request, res: Response) => {
 // 세부 일정 수정
 export const editDetailTrips = async (req: Request, res: Response) => {
   await Promise.all(validateEditDetailTrip.map((validate) => validate.run(req)));
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      errors: errors.array(),
+    });
+    return;
+  }
 
   const tripId = Number(req.params.tripId);
   const activityId = Number(req.params.activityId);
