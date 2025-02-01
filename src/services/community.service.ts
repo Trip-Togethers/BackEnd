@@ -9,6 +9,7 @@ export class CommunityServices {
       const postRepository = AppDataSource.getRepository(Posts);
       const commentRepository = AppDataSource.getRepository(Comments);
       const likeRepository = AppDataSource.getRepository(Likes);
+      const userRepository = AppDataSource.getRepository(User);
 
       // 전체 게시글 조회
       const posts = await postRepository.find({
@@ -30,10 +31,15 @@ export class CommunityServices {
               .where("likes.postId = :postId", { postId: post.id })
               .getCount();
 
+              // 작성자 정보 가져오기 (User 테이블에서 nickname, profilePicture 가져오기)
+            const user = await userRepository.findOne({
+              where: { id: post.userId }, // 작성자의 userId로 User 테이블에서 정보 찾기
+            });
+
             // 작성자 정보 가져오기
             const author = {
-              name: post.user.nickname || "Unknown",
-              profile_picture: post.user?.profilePicture || "",
+              name: user?.nickname || "Unknown",
+              profilePicture: user?.profilePicture || "",
             };
 
             return {
@@ -42,7 +48,7 @@ export class CommunityServices {
               postContent: post.postContent,
               author: {
                 nick: author.name,
-                profile: author.profile_picture,
+                profile: author.profilePicture,
               },
               createdAt: post.createdAt,
               likes: likesCount,
@@ -106,7 +112,7 @@ export class CommunityServices {
     const postRepository = AppDataSource.getRepository(Posts);
     const commentRepository = AppDataSource.getRepository(Comments);
     const likeRepository = AppDataSource.getRepository(Likes);
-
+    const userRepository =AppDataSource.getRepository(User);
     try {
       const post = await postRepository.findOne({
         relations: ["user"],
@@ -131,9 +137,15 @@ export class CommunityServices {
         .where("likes.postId = :postId", { postId: postId })
         .getCount();
       // 작성자 정보 가져오기
+      // 작성자 정보 가져오기 (User 테이블에서 nickname, profilePicture 가져오기)
+      const user = await userRepository.findOne({
+        where: { id: post.userId }, // 작성자의 userId로 User 테이블에서 정보 찾기
+      });
+
+      // 작성자 정보 가져오기
       const author = {
-        name: post?.user?.nickname || "Unknown",
-        profilePicture: post?.user?.profilePicture || "",
+        name: user?.nickname || "Unknown",
+        profilePicture: user?.profilePicture || "",
       };
 
       return {
