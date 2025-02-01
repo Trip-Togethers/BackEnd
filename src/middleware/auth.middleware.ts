@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import e, { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util';
 import { StatusCodes } from 'http-status-codes';
 
@@ -22,8 +22,11 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
       return;
     }
 
-    (req as any).user = decoded;
-    console.log(decoded)
+    req.user ={
+      userId: decoded.userId,
+      email: decoded.email
+    }
+    console.log(req.user)
     next();
   } catch (error: any) {
     console.error(error);

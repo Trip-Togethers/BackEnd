@@ -22,8 +22,14 @@ export const loopUpTrips = async (req: Request, res: Response) => {
     return;
   }
 
-  const email = (req as any).user.email;
-  const userId = (req as any).user.userId;
+  const email = req.user?.email;
+  const userId = req.user?.userId;
+  if(!email || !userId) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일 또는 아이디를 찾을 수 없습니다."
+    })
+    return;
+  }
   try {
     // 이메일에 해당하는 사용자 조회
     const user = await AppDataSource.getRepository(User).findOne({
@@ -101,8 +107,15 @@ export const addTrips = async (req: Request, res: Response) => {
   const putStartDate = new Date(startDate);
   const putEndDate = new Date(endDate);
 
-  const email = (req as any).user.email;
-  const owner = (req as any).user.userId;
+  const email = req.user?.email;
+  const owner = req.user?.userId;
+
+  if(!email || !owner) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일 또는 아이디를 찾을 수 없습니다."
+    })
+    return;
+  }
 
   let imageUrl;
 
@@ -165,8 +178,8 @@ export const removeTrips = async (req: Request, res: Response) => {
     return;
   }
 
-  const email = (req as any).user.email;
-  const userId = (req as any).user.userId;
+  const email = req.user?.email;
+  const userId = req.user?.userId;
 
   if (!tripId || isNaN(tripId)) {
     res.status(StatusCodes.BAD_REQUEST).json({
@@ -277,7 +290,13 @@ export const editTrips = async (req: Request, res:Response) => {
 
   const photoFilePath = handleFileUpload(req);
   const photoUrl = photoFilePath ? photoFilePath : "";
-  const email = (req as any).user.email;
+  const email = req.user?.email;
+  if(!email) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일을 찾을 수 없습니다."
+    })
+    return;
+  }
 
   try {
     const user = await getUserByEmail(email);

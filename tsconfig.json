@@ -13,9 +13,9 @@
     "experimentalDecorators": true, // 데코레이터 기능 사용 여부
     "emitDecoratorMetadata": true,  // 데코레이터를 통해 클래스와 속성에 대한 메타데이터 생성 여부
 
-    "typeRoots": ["./node_modules/@types", "src/types"]
+    "typeRoots": ["./src/types", "./node_modules/@types"],
 
   },
-  "include": ["src/**/*.ts"],     // 컴파일할 TypeScript 파일이 포함된 경로
+  "include": ["src/**/*.ts", "src/types/express/*.d.ts"],     // 컴파일할 TypeScript 파일이 포함된 경로
   "exclude": ["node_modules"]     // 컴파일에서 제외할 폴더
 }

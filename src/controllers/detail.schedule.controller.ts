@@ -30,10 +30,12 @@ export const lookUpDetailTrips = async (req: Request, res: Response) => {
       return;
     }
   const tripId = Number(req.params.tripId);
-  const email = (req as any).user.email;
+  const email = req.user?.email;
 
-  if (!email) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ message: "인증 토큰이 필요합니다." });
+  if(!email) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일을 찾을 수 없습니다."
+    })
     return;
   }
 
@@ -103,9 +105,15 @@ export const addDetailTrips = async (req: Request, res: Response) => {
   const tripId = Number(req.params.tripId);
   const { scheduleDate, scheduleTime, scheduleContent } = req.body;
   const utcScheduleDate = convertToUTC(scheduleDate);
-  const email = (req as any).user.email;
+  const email = req.user?.email;
+  if(!email) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일을 찾을 수 없습니다."
+    })
+    return;
+  }
 
-  try {
+  try { 
     const user = await getUserByEmail(email);
 
     if (!user) {
@@ -173,7 +181,13 @@ export const editDetailTrips = async (req: Request, res: Response) => {
   const activityId = Number(req.params.activityId);
   const { scheduleDate, scheduleTime, scheduleContent } = req.body;
   const utcScheduleDate = convertToUTC(scheduleDate);
-  const email = (req as any).user.email;
+  const email = req.user?.email;
+  if(!email) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일을 찾을 수 없습니다."
+    })
+    return;
+  }
 
   try {
     const user = await getUserByEmail(email);
@@ -257,7 +271,13 @@ export const removeDetailTrips = async (req: Request, res: Response) => {
 
   const tripId = Number(req.params.tripId);  
   const activityId = Number(req.params.activityId);
-  const email = (req as any).user.email;
+  const email = req.user?.email;
+  if(!email) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일을 찾을 수 없습니다."
+    })
+    return;
+  }
 
   try {
     const user = await getUserByEmail(email);

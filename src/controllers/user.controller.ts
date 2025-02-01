@@ -9,7 +9,13 @@ export class UserController {
   // 프로필 조회
   static async getUserProfile(req: Request, res: Response): Promise<void> {
     const userId = Number(req.params.user_id);
-    const loggedInUserId = (req as any).user.userId;
+    const loggedInUserId = req.user?.userId;
+    if (!loggedInUserId) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "아이디를 찾을 수 없습니다."
+      })
+      return;
+    }
 
     const isValid = await UserController.findUser(userId, loggedInUserId);
     if (!isValid) {
@@ -47,7 +53,13 @@ export class UserController {
   // 프로필 수정
   static async updateProfile(req: Request, res: Response): Promise<void> {
     const userId = Number(req.params.user_id);
-    const loggedInUserId = (req as any).user.userId;
+    const loggedInUserId = req.user?.userId;
+    if (!loggedInUserId) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "아이디를 찾을 수 없습니다."
+      })
+      return;
+    }
 
     const isValid = await UserController.findUser(userId, loggedInUserId);
     if (!isValid) {

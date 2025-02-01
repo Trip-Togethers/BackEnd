@@ -22,8 +22,8 @@ export const validateAddTrip = [
   body("destination")
     .notEmpty()
     .withMessage("목적지를 입력해 주세요")
-    .isLength({ min: 3, max: 20 })
-    .withMessage("제목은 3자 이상, 20자 이하로 입력해 주세요."),
+    .isLength({ min: 2, max: 20 })
+    .withMessage("목적지는 2자 이상, 20자 이하로 입력해 주세요."),
 ];
 
 export const validateDeleteTripId = [
@@ -59,6 +59,6 @@ export const validateEditTrip = [
     .optional({ checkFalsy: true })
     .notEmpty()
     .withMessage("목적지를 입력해 주세요")
-    .isLength({ min: 3, max: 20 })
-    .withMessage("제목은 3자 이상, 20자 이하로 입력해 주세요."),
+    .isLength({ min: 2, max: 20 })
+    .withMessage("목적지는 2자 이상, 20자 이하로 입력해 주세요."),
 ];

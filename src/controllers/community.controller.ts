@@ -19,7 +19,7 @@ export const createPost = async (req: Request, res: Response) => {
     return;
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
@@ -144,8 +144,7 @@ export const likePost = async (
   req: Request<GetPostByIdParams>,
   res: Response
 ) => {
-  const userId = (req as unknown as Request & { user: { userId: number } }).user
-    .userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
@@ -188,7 +187,7 @@ export const addCommentToPost = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
@@ -215,7 +214,7 @@ export const updateComment = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
@@ -242,7 +241,7 @@ export const deleteComment = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res

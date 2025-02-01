@@ -19,8 +19,14 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     }
 
   const { tripId, userId } = req.params; // 여행아이디, 초대자아이디
-  const guestId = (req as any).user.userId; // 동행자 아이디
-  const email = (req as any).user.email;
+  const guestId = req.user?.userId; // 동행자 아이디
+  const email = req.user?.email;
+  if(!email || !guestId) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일 또는 아이디를 찾을 수 없습니다."
+    })
+    return;
+  }
 
   try {
     if (guestId === Number(userId)) {
@@ -110,8 +116,14 @@ export const createInviteLink = async (req: Request, res: Response) => {
     }
 
   const { tripId } = req.params;
-  const userId = (req as any).user.userId;
-  const email = (req as any).user.email;
+  const userId = req.user?.userId;
+  const email = req.user?.email;
+  if(!email || !userId) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 이메일 또는 아이디를 찾을 수 없습니다."
+    })
+    return;
+  }
 
   try {
     const scheduleRepository = AppDataSource.getRepository(Schedule);
@@ -155,8 +167,14 @@ export const removeGuestToSchedule = async (req: Request, res: Response) => {
     }
 
   const { tripId, guestId } = req.params;
-  const userId = (req as any).user.userId;
-
+  const userId = req.user?.userId;
+  if(!userId) {
+    res.status(StatusCodes.NOT_FOUND).json({
+      message: "해당 아이디를 찾을 수 없습니다."
+    })
+    return;
+  }
+  
   try {
     const guestRepository = AppDataSource.getRepository(Guest);
 

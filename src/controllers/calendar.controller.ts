@@ -6,7 +6,12 @@ export const getCalendar = async (
   req: Request,
   res: Response
 ) => {
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
+  if (!userId) {
+    return res.status(StatusCodes.NOT_FOUND).json({
+      message: "사용자의 아이디를 찾을 수 없습니다."
+    })
+  }
 
   try {
     const calendar = await calendarServices.getCalendar(userId);
