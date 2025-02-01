@@ -11,7 +11,7 @@ export class Maps {
     user: User;
     
     @Column({ type: 'int', unsigned: true })
-    user_id: number;
+    userId: number;
 
     @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
     name: string;
@@ -23,5 +23,5 @@ export class Maps {
     longitude: number;
 
     @CreateDateColumn({ type: 'datetime' })
-    created_at: Date;
+    createdAt: Date;
 }
