@@ -141,9 +141,6 @@ export const createInviteLink = async (req: Request, res: Response) => {
     }
 
     const inviteCode = crypto.randomBytes(16).toString("hex");
-    console.log(tripId, userId, inviteCode);
-    await insertInviteLink(Number(tripId), userId, inviteCode, email);
-
     const inviteLink = `localhost:1111/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
 
     console.log(inviteLink);

@@ -470,7 +470,7 @@ export class CommunityServices {
 
       // 해당 댓글을 먼저 조회하여 작성자 ID 확인
       const existingComment = await commentRepository.findOne({
-        where: { id: postId },
+        where: { user_id: userId },
       });
 
       if (!existingComment) {
@@ -480,6 +480,8 @@ export class CommunityServices {
         };
       }
 
+      console.log(existingComment.user_id)
+      console.log(userId)
       // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
       if (existingComment.user_id !== userId) {
         return {

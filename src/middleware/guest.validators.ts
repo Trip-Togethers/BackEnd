@@ -15,5 +15,4 @@ export const validateInvite = [
 
   export const validateRemoveGuest = [
     param("tripId").isInt().withMessage("유효한 여행 ID를 입력해 주세요."),
-    param("guestId").isInt().withMessage("유효한 동행자 ID를 입력해 주세요."),
   ];
