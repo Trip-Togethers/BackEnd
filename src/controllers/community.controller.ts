@@ -81,7 +81,7 @@ export const updatePostById = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
@@ -126,7 +126,7 @@ export const deletePostById = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
