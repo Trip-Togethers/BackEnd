@@ -11,22 +11,22 @@ export class Posts {
     user: User;
 
     @Column({ type: 'int' })
-    trip_id: number;
+    tripId: number;
 
     @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    post_title: string;
+    postTitle: string;
 
     @Column({ nullable: true })
-    post_photoUrl: string;
+    postPhotoUrl: string;
 
     @Column({ type: 'text', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    post_content: string;
+    postContent: string;
 
     @CreateDateColumn({ type: 'datetime' })
-    created_at: Date;
+    createdAt: Date;
 
     @UpdateDateColumn({ type: 'datetime', nullable: true })
-    updated_at: Date | null;
+    updatedAt: Date | null;
 
     @OneToMany(() => Comments, (comment) => comment.post_id)
     comments: Comments[];
@@ -35,7 +35,7 @@ export class Posts {
     likes: Likes[];
 
     @Column()
-    user_id: number;
+    userId: number;
 }
 
 @Entity('comments')
@@ -45,23 +45,23 @@ export class Comments {
 
     @ManyToOne(() => Posts, (post) => post.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'post_id' })
-    post_id!: number;
+    postId!: number;
 
     @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User
 
     @Column()
-    user_id!: number;
+    userId!: number;
 
     @Column({ type: 'text', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
     content: string;
 
     @CreateDateColumn({ type: 'datetime' })
-    created_at: Date;
+    createdAt: Date;
 
     @UpdateDateColumn({ type: 'datetime', nullable: true })
-    updated_at: Date | null;
+    updatedAt: Date | null;
 }
 
 @Entity('likes')
@@ -71,12 +71,12 @@ export class Likes {
 
     @ManyToOne(() => Posts, (post) => post.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'post_id' })
-    post_id: number;
+    postId: number;
 
     @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
-    user_id: number;
+    userId: number;
 
     @CreateDateColumn({ type: 'datetime' })
-    created_at: Date;
+    createdAt: Date;
 }
