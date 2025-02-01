@@ -31,20 +31,20 @@ router
   ); // 게시글 작성하기
 
 router
-  .route("/:post_id")
+  .route("/:postId")
   .get(asyncHandler(getPostById)) // 게시글 상세보기
   .put(authMiddleware, asyncHandler(updatePostById)) // 게시글 수정하기
   .delete(authMiddleware, asyncHandler(deletePostById)); // 게시글 삭제하기
 
-router.route("/:post_id/like").post(authMiddleware, asyncHandler(likePost)); // 좋아요 추가 및 취소
+router.route("/:postId/like").post(authMiddleware, asyncHandler(likePost)); // 좋아요 추가 및 취소
 
 router
-  .route("/:post_id/comments")
+  .route("/:postId/comments")
   .get(asyncHandler(getCommentsForPost)) // 댓글 조회
   .post(authMiddleware, asyncHandler(addCommentToPost)); // 댓글 작성
 
 router
-  .route("/:post_id/comments/:comment_id")
+  .route("/:postId/comments/:commentId")
   .put(authMiddleware, asyncHandler(updateComment)) // 댓글 수정
   .delete(authMiddleware, asyncHandler(deleteComment)); // 댓글 삭제
 

@@ -4,11 +4,11 @@ import { GetCalendarByIdParams } from '../types/params.type';
 
 export class calendarServices {
     static async getMaps(params: GetCalendarByIdParams) {
-        const user_id = Number(params.user_id);
+        const userId = Number(params.userId);
         const mapRepository = AppDataSource.getRepository(Maps);
 
         const maps = await mapRepository.find({
-            where: { user_id: user_id },
+            where: { userId: userId },
         });
         
         return {

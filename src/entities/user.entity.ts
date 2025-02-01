@@ -39,17 +39,17 @@ export class User {
   @OneToMany(() => Schedule, (schedule) => schedule.user)
   schedule?: Schedule[];
 
-  @Column()
-  profile_picture: string;
+  @Column({ nullable: true, default: '' })
+  profilePicture: string;
 
-  @Column()
+  @Column({ nullable: true, default: '' })
   contact: string;
 
-  @Column()
-  login_category: string;
+  @Column({ nullable: true, default: '' })
+  loginCategory: string;
 
   @DeleteDateColumn({ type: "datetime", nullable: true })
-  deleted_at: Date;
+  deletedAt: Date;
 
   @OneToMany(() => Posts, (post) => post.user)
   posts: Posts[];

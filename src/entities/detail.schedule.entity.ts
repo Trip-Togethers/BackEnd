@@ -30,6 +30,6 @@ export class Detaile {
   updatedAt!: Date;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.details, { onDelete: "CASCADE"})
-  @JoinColumn({ name: 'schedule_id' })
+  @JoinColumn({ name: 'scheduleId' })
   schedule!: Schedule;
 }

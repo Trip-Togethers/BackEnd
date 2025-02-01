@@ -6,25 +6,29 @@ import AppDataSource from "../data-source";
 import { Guest } from "../entities/guest.entity";
 import { Schedule } from "../entities/schedule.entity";
 import { User } from "../entities/user.entity";
-import { validateInvite, validateRemoveGuest, validateTripId } from "../middleware/guest.validators";
+import {
+  validateInvite,
+  validateRemoveGuest,
+  validateTripId,
+} from "../middleware/guest.validators";
 import { validationResult } from "express-validator";
 
 // 동행자 추가
 export const addGuestToSchedule = async (req: Request, res: Response) => {
   await Promise.all(validateInvite.map((validator) => validator.run(req)));
   const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-       res.status(400).json({ errors: errors.array() });
-       return;
-    }
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
   const { tripId, userId } = req.params; // 여행아이디, 초대자아이디
   const guestId = req.user?.userId; // 동행자 아이디
   const email = req.user?.email;
-  if(!email || !guestId) {
+  if (!email || !guestId) {
     res.status(StatusCodes.NOT_FOUND).json({
-      message: "해당 이메일 또는 아이디를 찾을 수 없습니다."
-    })
+      message: "해당 이메일 또는 아이디를 찾을 수 없습니다.",
+    });
     return;
   }
 
@@ -41,11 +45,12 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     // 초대 링크에 해당하는 동행자 정보 조회
     const guest = await guestRepository.findOne({
       where: {
-        userId: Number(userId), 
-        schedule: { id: Number(tripId) }, 
+        userId: Number(userId),
+        schedule: { id: Number(tripId) },
       },
-      relations: ["schedule"], 
+      relations: ["schedule"],
     });
+    console.log(guest);
 
     // 이미 동행자로 추가된 유저인지 확인
     const existingGuest = await guestRepository.findOne({
@@ -61,11 +66,6 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "이미 동행자로 추가된 사용자입니다." });
       return;
-    } else if (!guest) {
-      res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "초대 링크가 유효하지 않거나 잘못된 링크입니다." });
-      return;
     }
 
     const mainSchedule = await AppDataSource.getRepository(Schedule).findOne({
@@ -78,25 +78,28 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
       });
       return;
     }
-    // 동행자 추가: 수락 시점 설정
-    guest.acceptedAt = new Date(); // 초대 수락 시각
-    guest.userId = guestId;
-    guest.email = email;
-    guest.schedule = mainSchedule;
+    if (!guest) {
+      // guest가 없으면 새로운 동행자 추가
+      const newGuest = guestRepository.create({
+        userId: guestId, // 동행자의 userId
+        email: email, // 동행자의 email
+        schedule: mainSchedule, // 여행 스케줄
+        acceptedAt: new Date(), // 초대 수락 시각
+      });
 
-    // 데이터베이스에 저장 (동행자 정보 업데이트)
-    await guestRepository.save(guest);
+      // 데이터베이스에 저장 (동행자 정보 업데이트)
+      await guestRepository.save(newGuest);
 
-    console.log(mainSchedule)
-    res.status(StatusCodes.OK).json({
-      message: "동행자가 여행 일정에 성공적으로 추가되었습니다.",
-      guest: {
-        userId: guest.userId,
-        email: email,
-        inviteCode: guest.inviteCode,
-        acceptedAt: guest.acceptedAt,
-      },
-    });
+      console.log(mainSchedule);
+      res.status(StatusCodes.OK).json({
+        message: "동행자가 여행 일정에 성공적으로 추가되었습니다.",
+        guest: {
+          userId: newGuest.userId,
+          email: email,
+          acceptedAt: newGuest.acceptedAt,
+        },
+      });
+    }
   } catch (error) {
     console.error(error);
     res
@@ -107,21 +110,20 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
 
 // 초대 링크 생성
 export const createInviteLink = async (req: Request, res: Response) => {
-  
   await Promise.all(validateTripId.map((validator) => validator.run(req)));
   const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-       res.status(400).json({ errors: errors.array() });
-       return;
-    }
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
   const { tripId } = req.params;
   const userId = req.user?.userId;
   const email = req.user?.email;
-  if(!email || !userId) {
+  if (!email || !userId) {
     res.status(StatusCodes.NOT_FOUND).json({
-      message: "해당 이메일 또는 아이디를 찾을 수 없습니다."
-    })
+      message: "해당 이메일 또는 아이디를 찾을 수 없습니다.",
+    });
     return;
   }
 
@@ -158,20 +160,20 @@ export const createInviteLink = async (req: Request, res: Response) => {
 export const removeGuestToSchedule = async (req: Request, res: Response) => {
   await Promise.all(validateRemoveGuest.map((validator) => validator.run(req)));
   const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-       res.status(400).json({ errors: errors.array() });
-       return;
-    }
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
   const { tripId, guestId } = req.params;
   const userId = req.user?.userId;
-  if(!userId) {
+  if (!userId) {
     res.status(StatusCodes.NOT_FOUND).json({
-      message: "해당 아이디를 찾을 수 없습니다."
-    })
+      message: "해당 아이디를 찾을 수 없습니다.",
+    });
     return;
   }
-  
+
   try {
     const guestRepository = AppDataSource.getRepository(Guest);
 
@@ -218,10 +220,10 @@ export const removeGuestToSchedule = async (req: Request, res: Response) => {
 export const lookUpUserList = async (req: Request, res: Response) => {
   await Promise.all(validateRemoveGuest.map((validator) => validator.run(req)));
   const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-       res.status(400).json({ errors: errors.array() });
-       return;
-    }
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
   const { tripId } = req.params;
 

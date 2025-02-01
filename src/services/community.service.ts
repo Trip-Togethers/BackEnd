@@ -21,43 +21,43 @@ export class CommunityServices {
             // 댓글 수 가져오기
             const commentsCount = await commentRepository
               .createQueryBuilder("comments")
-              .where("comments.post_id = :post_id", { post_id: post.id })
+              .where("comments.postId = :postId", { postId: post.id })
               .getCount();
 
             // 좋아요 수 가져오기
             const likesCount = await likeRepository
               .createQueryBuilder("likes")
-              .where("likes.post_id = :post_id", { post_id: post.id })
+              .where("likes.postId = :postId", { postId: post.id })
               .getCount();
 
             // 작성자 정보 가져오기
             const author = {
               name: post.user.nickname || "Unknown",
-              profile_picture: post.user?.profile_picture || "",
+              profile_picture: post.user?.profilePicture || "",
             };
 
             return {
               id: post.id,
-              post_title: post.post_title,
-              post_content: post.post_content,
+              postTitle: post.postTitle,
+              postContent: post.postContent,
               author: {
                 nick: author.name,
                 profile: author.profile_picture,
               },
-              created_at: post.created_at,
+              createdAt: post.createdAt,
               likes: likesCount,
               comments_count: commentsCount,
             };
           } catch (error) {
             return {
               id: post.id,
-              post_title: post.post_title,
-              post_content: post.post_content,
+              postTitle: post.postTitle,
+              postContent: post.postContent,
               author: {
                 nick: "Unknown",
                 profile: "",
               },
-              created_at: post.created_at,
+              createdAt: post.createdAt,
               likes: 0,
               comments_count: 0,
             };
@@ -83,11 +83,11 @@ export class CommunityServices {
 
     try {
       const newPost = new Posts();
-      newPost.post_title = params.post_title;
-      newPost.post_photoUrl = params.imageUrl;
-      newPost.post_content = params.post_content;
-      newPost.user_id = params.userId;
-      newPost.trip_id = params.trip_id;
+      newPost.postTitle = params.postTitle;
+      newPost.postPhotoUrl = params.imageUrl;
+      newPost.postContent = params.postContent;
+      newPost.userId = params.userId;
+      newPost.tripId = params.tripId;
 
       await postRepository.save(newPost);
       return {
@@ -123,17 +123,17 @@ export class CommunityServices {
       // 댓글 수 가져오기
       const commentsCount = await commentRepository
         .createQueryBuilder("comments")
-        .where("comments.post_id = :post_id", { post_id: postId })
+        .where("comments.postId = :postId", { postId: postId })
         .getCount();
       // 좋아요 수 가져오기
       const likesCount = await likeRepository
         .createQueryBuilder("likes")
-        .where("likes.post_id = :post_id", { post_id: postId })
+        .where("likes.postId = :postId", { postId: postId })
         .getCount();
       // 작성자 정보 가져오기
       const author = {
         name: post?.user?.nickname || "Unknown",
-        profilePicture: post?.user?.profile_picture || "",
+        profilePicture: post?.user?.profilePicture || "",
       };
 
       return {
@@ -141,15 +141,15 @@ export class CommunityServices {
         statusCode: StatusCodes.OK,
         post: {
           id: postId,
-          post_title: post?.post_title,
-          post_content: post?.post_content,
-          post_photoUrl: post?.post_photoUrl,
+          postTitle: post?.postTitle,
+          postContent: post?.postContent,
+          postPhotoUrl: post?.postPhotoUrl,
           author: {
             nick: author.name,
             profile: author.profilePicture,
           },
-          created_at: post?.created_at,
-          updated_at: post?.updated_at,
+          createdAt: post?.createdAt,
+          updatedAt: post?.updatedAt,
           likes: likesCount,
           comments_count: commentsCount,
         },
@@ -177,7 +177,7 @@ export class CommunityServices {
         };
       }
 
-      if (post.user_id !== userId) {
+      if (post.userId !== userId) {
         return {
           message: "작성만 수정할 수 있습니다.",
           statusCode: StatusCodes.FORBIDDEN,
@@ -191,10 +191,10 @@ export class CommunityServices {
         statusCode: StatusCodes.OK,
         post: {
           id: postId,
-          post_title: post?.post_title,
-          post_content: post?.post_content,
-          post_photoUrl: post?.post_photoUrl,
-          updated_at: post?.updated_at,
+          postTitle: post?.postTitle,
+          postContent: post?.postContent,
+          postPhotoUrl: post?.postPhotoUrl,
+          updatedAt: post?.updatedAt,
         },
       };
     } catch (error) {
@@ -220,7 +220,7 @@ export class CommunityServices {
       }
 
       // 이건 버튼을 보이지않게 하면 될 듯 싶다.
-      if (post.user_id !== userId) {
+      if (post.userId !== userId) {
         return {
           message:
             "삭제 권한이 없습니다. 다른 사용자의 게시글은 삭제할 수 없습니다.",
@@ -261,15 +261,15 @@ export class CommunityServices {
   
       // 2. 사용자가 이미 좋아요를 눌렀는지 확인
       const existingLike = await likeRepository.findOne({
-        where: { post_id: postId, user_id: userId },
+        where: { postId: postId, userId: userId },
       });
   
       if (existingLike) {
         // 이미 좋아요를 눌렀다면 -> 좋아요 취소
-        await likeRepository.delete({ post_id: postId, user_id: userId });
+        await likeRepository.delete({ postId: postId, userId: userId });
   
         // 삭제 후 좋아요 수 갱신
-        const updatedLikes = await likeRepository.count({ where: { post_id: postId } });
+        const updatedLikes = await likeRepository.count({ where: { postId: postId } });
   
         return {
           message: "좋아요 취소 완료",
@@ -278,10 +278,10 @@ export class CommunityServices {
         };
       } else {
         // 좋아요 추가
-        await likeRepository.insert({ post_id: postId, user_id: userId });
+        await likeRepository.insert({ postId: postId, userId: userId });
   
         // 좋아요 수 갱신
-        const updatedLikes = await likeRepository.count({ where: { post_id: postId } });
+        const updatedLikes = await likeRepository.count({ where: { postId: postId } });
   
         return {
           message: "좋아요 추가 완료",
@@ -303,7 +303,7 @@ export class CommunityServices {
 
       const comments = await commentRepository.find({
         relations: ["user"],
-        where: { post_id: postId },
+        where: { postId: postId },
       });
 
       const results = await Promise.all(
@@ -312,7 +312,7 @@ export class CommunityServices {
             // 작성자 정보 가져오기
             const author = {
               name: comment?.user?.nickname || "Unknown",
-              profile_picture: comment?.user?.profile_picture || "",
+              profile_picture: comment?.user?.profilePicture || "",
             };
 
             return {
@@ -322,7 +322,7 @@ export class CommunityServices {
                 nick: author.name,
                 profile: author.profile_picture,
               },
-              created_at: comment.created_at,
+              createdAt: comment.createdAt,
             };
           } catch (error) {
             return {
@@ -332,7 +332,7 @@ export class CommunityServices {
                 nick: "Unknown",
                 profile: "",
               },
-              created_at: comment.created_at,
+              createdAt: comment.createdAt,
             };
           }
         })
@@ -377,8 +377,8 @@ export class CommunityServices {
       }
 
       const newCommentst = new Comments();
-      (newCommentst.post_id = postId),
-        (newCommentst.user_id = userId),
+      (newCommentst.postId = postId),
+        (newCommentst.userId = userId),
         (newCommentst.content = comment);
 
       const savedComment = await commentRepository.save(newCommentst);
@@ -388,7 +388,7 @@ export class CommunityServices {
         statusCode: StatusCodes.OK,
         comment: {
           content: savedComment.content,
-          created_at: savedComment.created_at,
+          createdAt: savedComment.createdAt,
         },
       };
     } catch (error) {
@@ -416,7 +416,7 @@ export class CommunityServices {
       }
 
       // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
-      if (existingComment.user_id !== userId) {
+      if (existingComment.userId !== userId) {
         return {
           message: "댓글 작성자만 댓글을 수정할 수 있습니다.",
           statusCode: StatusCodes.FORBIDDEN,
@@ -440,8 +440,8 @@ export class CommunityServices {
         comment: {
           id: commentId,
           content: updatedComment?.content,
-          created_at: updatedComment?.created_at,
-          updated_at: updatedComment?.updated_at,
+          createdAt: updatedComment?.createdAt,
+          updatedAt: updatedComment?.updatedAt,
         },
       };
     } catch (error) {
@@ -470,7 +470,7 @@ export class CommunityServices {
 
       // 해당 댓글을 먼저 조회하여 작성자 ID 확인
       const existingComment = await commentRepository.findOne({
-        where: { user_id: userId },
+        where: { userId: userId },
       });
 
       if (!existingComment) {
@@ -480,10 +480,10 @@ export class CommunityServices {
         };
       }
 
-      console.log(existingComment.user_id)
+      console.log(existingComment.userId)
       console.log(userId)
       // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
-      if (existingComment.user_id !== userId) {
+      if (existingComment.userId !== userId) {
         return {
           message: "댓글 작성자만 댓글을 삭제할 수 있습니다.",
           statusCode: StatusCodes.FORBIDDEN,

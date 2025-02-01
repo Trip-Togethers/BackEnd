@@ -46,7 +46,7 @@ export class Schedule {
 
   // user_id 외래키 설정
   @ManyToOne(() => User, (user) => user.schedule, {onDelete: "CASCADE"})
-  @JoinColumn({ name: "user_email", referencedColumnName: "email" })
+  @JoinColumn({ name: "userEmail", referencedColumnName: "email" })
   user!: User;
 
   @Column()

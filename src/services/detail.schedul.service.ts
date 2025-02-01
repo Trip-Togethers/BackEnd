@@ -6,15 +6,15 @@ import { isDateInRange } from "../utils/detail.schedule.util";
 
 // 일정 생성
 export const insertDetailSchedule = async (
-  schedule_id: number,
-  schedule_date: Date,
-  schedule_time: string,
-  schedule_content: string
+  scheduleId: number,
+  scheduleDate: Date,
+  scheduleTime: string,
+  scheduleContent: string
 ) => {
   const scheduleRepository = AppDataSource.getRepository(Schedule);
   const schedule = await scheduleRepository.findOne({
     where: {
-      id: schedule_id,
+      id: scheduleId,
     }, 
   });
 
@@ -28,9 +28,9 @@ export const insertDetailSchedule = async (
   // 새 일정 객체 생성
   const newDetailSchedule = new Detaile(); 
   newDetailSchedule.schedule = schedule;
-  newDetailSchedule.scheduleDate = schedule_date;
-  newDetailSchedule.scheduleTime = schedule_time;
-  newDetailSchedule.scheduleContent = schedule_content;
+  newDetailSchedule.scheduleDate = scheduleDate;
+  newDetailSchedule.scheduleTime = scheduleTime;
+  newDetailSchedule.scheduleContent = scheduleContent;
 
   // 데이터 베이스에 저장
   await detailScheduleRepository.save(newDetailSchedule);

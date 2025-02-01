@@ -5,7 +5,7 @@ const asyncHandler = (fn: Function) => (req: Request, res: Response, next: Funct
 import { getMaps, insertMaps } from '../controllers/maps.controller';
 
 router
-    .route('/destinations/:user_id')
+    .route('/destinations/:userId')
     .get(asyncHandler(getMaps))
 
     router

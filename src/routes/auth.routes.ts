@@ -19,17 +19,17 @@ router.post("/login", AuthController.login);
 // 로그아웃
 router.delete("/logout", AuthController.logout);
 
-router.get("/:user_id", authMiddleware, UserController.getUserProfile);
+router.get("/:userId", authMiddleware, UserController.getUserProfile);
 
 router.put(
-  "/:user_id",
+  "/:userId",
   upload.single("image"),
   authMiddleware,
   UserController.updateProfile
 );
 
-router.get("/:user_id/menu", authMiddleware, UserController.getUserMenu);
+router.get("/:userId/menu", authMiddleware, UserController.getUserMenu);
 
-router.delete("/:user_id", authMiddleware, UserController.deleteAccount);
+router.delete("/:userId", authMiddleware, UserController.deleteAccount);
 
 export default router;

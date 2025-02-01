@@ -43,12 +43,12 @@ export const createPost = async (req: Request, res: Response) => {
   }
 
   // req.body에서 trip_id를 가져와서 postParams에 포함
-  const { trip_id, post_title, post_content } = req.body;
+  const { tripId, postTitle, postContent } = req.body;
   const postParams = {
-    trip_id,
-    post_title,
+    tripId,
+    postTitle,
     imageUrl,
-    post_content,
+    postContent,
     userId,
   };
 
@@ -62,7 +62,7 @@ export const getPostById = async (
   req: Request<GetPostByIdParams>,
   res: Response
 ) => {
-  const postId = parseInt(req.params.post_id);
+  const postId = parseInt(req.params.postId);
 
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
@@ -75,13 +75,13 @@ export const getPostById = async (
 };
 
 export const updatePostById = async (req: Request, res: Response) => {
-  const postId = parseInt(req.params.post_id);
+  const postId = parseInt(req.params.postId);
 
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
@@ -105,12 +105,12 @@ export const updatePostById = async (req: Request, res: Response) => {
   }
 
   // req.body에서 trip_id를 가져와서 postParams에 포함
-  const { trip_id, post_title, post_content } = req.body;
+  const { tripId, postTitle, postContent } = req.body;
   const postParams = {
-    trip_id,
-    post_title,
+    tripId,
+    postTitle,
     imageUrl,
-    post_content,
+    postContent,
   };
 
   const post = await CommunityServices.updatePostById(postParams, postId, userId);
@@ -120,13 +120,13 @@ export const updatePostById = async (req: Request, res: Response) => {
 };
 
 export const deletePostById = async (req: Request, res: Response) => {
-  const postId = parseInt(req.params.post_id);
+  const postId = parseInt(req.params.postId);
 
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
 
-  const userId = (req as Request & { user: { userId: number } }).user.userId;
+  const userId = req.user?.userId;
 
   if (!userId) {
     return res
@@ -152,7 +152,7 @@ export const likePost = async (
       .json({ message: "사용자를 찾을 수 없습니다." });
   }
 
-  const postId = parseInt(req.params.post_id);
+  const postId = parseInt(req.params.postId);
 
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
@@ -168,7 +168,7 @@ export const getCommentsForPost = async (
   req: Request<GetPostByIdParams>,
   res: Response
 ) => {
-  const postId = parseInt(req.params.post_id);
+  const postId = parseInt(req.params.postId);
 
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
@@ -181,7 +181,7 @@ export const getCommentsForPost = async (
 };
 
 export const addCommentToPost = async (req: Request, res: Response) => {
-  const postId = parseInt(req.params.post_id);
+  const postId = parseInt(req.params.postId);
 
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
@@ -208,7 +208,7 @@ export const addCommentToPost = async (req: Request, res: Response) => {
 };
 
 export const updateComment = async (req: Request, res: Response) => {
-  const commentId = parseInt(req.params.comment_id);
+  const commentId = parseInt(req.params.commentId);
 
   if (isNaN(commentId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
@@ -235,7 +235,7 @@ export const updateComment = async (req: Request, res: Response) => {
 };
 
 export const deleteComment = async (req: Request, res: Response) => {
-  const postId = parseInt(req.params.post_id);
+  const postId = parseInt(req.params.postId);
 
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });

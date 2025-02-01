@@ -32,7 +32,7 @@ export class UserService {
     if (nickname) user.nickname = nickname;
     if (email) user.email = email;
     if (newPassword) user.password = await bcrypt.hash(newPassword, 10);
-    if (imageUrl) user.profile_picture = imageUrl;
+    if (imageUrl) user.profilePicture = imageUrl;
 
     await this.userRepo.save(user);
   }

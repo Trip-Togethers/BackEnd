@@ -1,21 +1,21 @@
 export interface GetPostByIdParams {
-    post_id: string;
+    postId: string;
 }
   
 export interface UpdatePostBody {
-  post_title?: string;
-  post_content?: string;
-  post_photoUrl?: string;
+  postTitle?: string;
+  postContent?: string;
+  postPhotoUrl?: string;
 }
 
 export interface addCommentToPostBody {
   content?: string;
-  post_id?: number;
-  user_id?: number;
+  postId?: number;
+  userId?: number;
 }
 
 export interface GetCommentByIdParams {
-  comment_id: number;
+  commentId: number;
 }
 
 export interface updateCommentBody {
@@ -23,5 +23,5 @@ export interface updateCommentBody {
 }
 
 export interface GetCalendarByIdParams {
-  user_id: number;
+  userId: number;
 }

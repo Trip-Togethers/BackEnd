@@ -6,7 +6,7 @@ const asyncHandler = (fn: Function) => (req: Request, res: Response, next: Funct
 import { getCalendar } from '../controllers/calendar.controller';
 
 router
-    .route('/:user_id')
+    .route('/:userId')
     .get(authMiddleware, asyncHandler(getCalendar))
 
 export default router;

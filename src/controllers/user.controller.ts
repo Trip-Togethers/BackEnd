@@ -8,7 +8,7 @@ const userService = new UserService();
 export class UserController {
   // 프로필 조회
   static async getUserProfile(req: Request, res: Response): Promise<void> {
-    const userId = Number(req.params.user_id);
+    const userId = Number(req.params.userId);
     const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       res.status(StatusCodes.NOT_FOUND).json({
@@ -40,7 +40,7 @@ export class UserController {
         user: {
           nickname: user.nickname,
           email: user.email,
-          profile_picture: user.profile_picture, // 이미지 URL이 있을 경우 반환
+          profile_picture: user.profilePicture, // 이미지 URL이 있을 경우 반환
         },
       });
     } catch (error) {
@@ -52,7 +52,7 @@ export class UserController {
   }
   // 프로필 수정
   static async updateProfile(req: Request, res: Response): Promise<void> {
-    const userId = Number(req.params.user_id);
+    const userId = Number(req.params.userId);
     const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       res.status(StatusCodes.NOT_FOUND).json({
@@ -60,6 +60,7 @@ export class UserController {
       })
       return;
     }
+    console.log(userId, loggedInUserId)
 
     const isValid = await UserController.findUser(userId, loggedInUserId);
     if (!isValid) {
@@ -68,6 +69,7 @@ export class UserController {
       });
       return;
     }
+
     
     try {
       let imageUrl;
@@ -105,7 +107,7 @@ export class UserController {
   // 메뉴
   static async getUserMenu(req: Request, res: Response): Promise<void> {
     try {
-      const userId = Number(req.params.user_id);
+      const userId = Number(req.params.userId);
       const menu = await userService.getUserMenu(userId);
 
       res.status(StatusCodes.OK).json({ menu });
