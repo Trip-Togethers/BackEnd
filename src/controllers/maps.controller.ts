@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { calendarServices } from '../services/maps.service';
 import { GetCalendarByIdParams } from '../types/params.type';
-
+import { StatusCodes } from 'http-status-codes';
+import { validateInsertMap } from '../middleware/map.validators';
+import { validationResult } from 'express-validator';
 
 export const getMaps = async (req: Request<GetCalendarByIdParams>, res: Response) => {
     const map = await calendarServices.getMaps(req.params);
@@ -9,8 +11,15 @@ export const getMaps = async (req: Request<GetCalendarByIdParams>, res: Response
 };
 
 export const insertMaps = async (req: Request, res: Response) => {
+    await Promise.all(validateInsertMap.map((validate) => validate.run(req)));
 
-    if (!req.body.name || !req.body.address_name || !req.body.latitude || !req.body.longitude) return res.status(400).json({ message: "유효하지 않은 데이터입니다." });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+            errors: errors.array(),
+        });
+        return;
+    }
 
     const map = await calendarServices.insertMaps(req.body);
     res.json(map);
