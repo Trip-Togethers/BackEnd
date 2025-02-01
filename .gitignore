@@ -1,2 +1,13 @@
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+*.icloud
+
 node_modules/
 .env
