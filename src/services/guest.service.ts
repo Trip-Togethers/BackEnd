@@ -6,9 +6,7 @@ import crypto from 'crypto'
 // 초대 링크 생성
 export const insertInviteLink = async (
   tripId: number,
-  userId: number,
   inviteCode: string,
-  email: string
 ) => {
   const inviteLinkRepository = AppDataSource.getRepository(Guest);
   const scheduleRepository = AppDataSource.getRepository(Schedule);
@@ -21,25 +19,23 @@ export const insertInviteLink = async (
 
   if (existingCode) {
     const newInviteCode = crypto.randomBytes(16).toString("hex");
-    await insertInviteLink(tripId, userId, newInviteCode, email); // 재귀 호출
+    await insertInviteLink(tripId, newInviteCode); // 재귀 호출
     return;
   }
   
   const schedule = await scheduleRepository.findOne({ where: { id: tripId } });
   
   if (!schedule) {
-    throw new Error("Schedule not found for the given tripId");
+    throw new Error("해당 일정을 찾을 수 없습니다.");
   }
   
   // 새 초대 링크 객체 생성
   const newGuestInviteLink = new Guest();
   newGuestInviteLink.schedule = schedule;
-  newGuestInviteLink.userId = userId;
   newGuestInviteLink.inviteCode = inviteCode;
   newGuestInviteLink.invitedAt = new Date();
-  newGuestInviteLink.email = email
 
   // 데이터베이스에 저장
   await inviteLinkRepository.save(newGuestInviteLink);
-  console.log("Invite link has been saved");
+  console.log("초대링크가 저장되었습니다.");
 };
