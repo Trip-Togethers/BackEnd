@@ -11,3 +11,5 @@ Temporary Items
 
 node_modules/
 .env
+trip-together-ec2-key.pem
+trip-together-ec2-key.ppk
