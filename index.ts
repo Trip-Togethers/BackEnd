@@ -11,21 +11,12 @@ import googleAuthRoutes from './src/auth/googleAuth.routes'
 import profileRoutes from './src/routes/profile.routes'
 import mapsRouter from './src/routes/maps.routes'
 import { TableType } from "typeorm/metadata/types/TableTypes.js";
-import cors from 'cors'
 
 // dotenv 모듈 로드
 dotenv.config();
 
 // express 앱 초기화
 const app = express();
-
-// cors 설정
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
 
 // JSON 바디 파싱 미들웨어 추가
 app.use(express.json());
