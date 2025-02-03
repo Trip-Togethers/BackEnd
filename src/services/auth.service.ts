@@ -6,6 +6,10 @@ import { generateToken } from "../utils/jwt.util";
 export class AuthService {
   private userRepo = AppDataSource.getRepository(User);
 
+  async checkEmailDuplicate(email: string): Promise<boolean> {
+    const existingUser = await this.userRepo.findOne({ where: { email } });
+    return existingUser !== null;
+  }
   async register(email: string, password: string): Promise<void> {
     const existingUser = await this.userRepo.findOne({ where: { email } });
     if (existingUser) {

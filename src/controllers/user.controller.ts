@@ -70,7 +70,7 @@ export class UserController {
       return;
     }
 
-    
+
     try {
       let imageUrl;
 
