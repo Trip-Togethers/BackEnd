@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import AppDataSource from '../data-source';
 import { Maps } from '../entities/map.entity';
 import { GetCalendarByIdParams } from '../types/params.type';
@@ -12,8 +13,8 @@ export class calendarServices {
         });
         
         return {
-            success: true,
             message: '목적지 불러오기 완료',
+            statusCode: StatusCodes.OK,
             destinations: maps,
         };
     }
@@ -23,14 +24,14 @@ export class calendarServices {
         try {
             const savedMap = await mapRepository.save(params);
             return {
-                success: true,
                 message: '목적지 저장 완료',
+                statusCode: StatusCodes.OK,
                 destination: savedMap,
             };
         } catch (error) {
             return {
-                success: false,
                 message: '목적지 저장 완료 중 오류가 발생했습니다.',
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
             };
         }
     }
