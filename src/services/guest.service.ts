@@ -1,5 +1,4 @@
 import AppDataSource from "../data-source";
-import { Guest } from "../entities/guest.entity"; // 초대 링크 엔티티
 import { Invitaion } from "../entities/invitaion.entity";
 import { Schedule } from "../entities/schedule.entity";
 import crypto from 'crypto'
@@ -33,13 +32,14 @@ export const insertInviteLink = async (
   
   const link = `http://${process.env.ENDPOINT}:${process.env.PORT}/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
   // 새 초대 링크 객체 생성
-  const newGuestInviteLink = new Invitaion();
-  newGuestInviteLink.tripId = tripId;
-  newGuestInviteLink.link = link
-  newGuestInviteLink.invitedAt = new Date();
+  const newInviteLink = new Invitaion();
+  newInviteLink.tripId = tripId;
+  newInviteLink.link = link;
+  newInviteLink.createLinkUser = userId;
+  newInviteLink.invitedAt = new Date();
 
   // 데이터베이스에 저장
-  await inviteLinkRepository.save(newGuestInviteLink);
+  await inviteLinkRepository.save(newInviteLink);
   console.log("초대링크가 저장되었습니다.");
 
   return link;

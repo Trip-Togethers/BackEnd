@@ -15,5 +15,5 @@ export class Invitaion {
     invitedAt!: Date;
 
     @Column()
-    createLinkUser!: string;
+    createLinkUser!: number;
 }
