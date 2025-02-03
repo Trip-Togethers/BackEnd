@@ -7,6 +7,21 @@ const authService = new AuthService();
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const email = req.query.email as string; // GET 요청에서 email 파라미터 받기
+      if (!email) {
+        res.status(400).json({ message: '이메일을 입력해주세요.' });
+        return;
+      }
+      const isDuplicate = await authService.checkEmailDuplicate(email);
+      if (isDuplicate) {
+        res.status(409).json({ message: '이미 사용 중인 이메일입니다.' });
+      } else {
+        res.status(200).json({ message: '사용 가능한 이메일입니다.' });
+      }
+    } catch (error) {
+      next(error);
+    }
+    try {
       const { email, password } = req.body;
       await authService.register(email, password);
 
