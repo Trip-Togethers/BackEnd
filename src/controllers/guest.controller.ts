@@ -143,11 +143,11 @@ export const createInviteLink = async (req: Request, res: Response) => {
     }
 
     const inviteCode = crypto.randomBytes(16).toString("hex");
-    await insertInviteLink(Number(tripId), inviteCode);
-    const inviteLink = `http://${process.env.ENDPOINT}:${process.env.PORT}/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
+    const link = await insertInviteLink(Number(tripId), inviteCode, userId);
 
     res.status(StatusCodes.OK).json({
-      message: inviteLink,
+      message: "초대 링크가 생성되었습니다.",
+      link
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
