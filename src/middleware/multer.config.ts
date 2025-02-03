@@ -4,7 +4,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import fs from "fs";
 import { S3Client } from "@aws-sdk/client-s3";
 import dotenv from "dotenv"; 
-
+//s
 dotenv.config();
 
 // S3 객체 생성
