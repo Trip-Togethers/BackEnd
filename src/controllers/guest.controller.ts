@@ -144,9 +144,8 @@ export const createInviteLink = async (req: Request, res: Response) => {
 
     const inviteCode = crypto.randomBytes(16).toString("hex");
     await insertInviteLink(Number(tripId), inviteCode);
-    const inviteLink = `localhost:1111/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
+    const inviteLink = `http://${process.env.ENDPOINT}:${process.env.PORT}/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
 
-    console.log(inviteLink);
     res.status(StatusCodes.OK).json({
       message: inviteLink,
     });
