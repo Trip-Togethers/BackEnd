@@ -10,8 +10,10 @@ export class AuthController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    
+    const { email, password } = req.body;
+    
     try {
-      const email = req.query.email as string; // GET 요청에서 email 파라미터 받기
       if (!email) {
         res.status(400).json({ message: "이메일을 입력해주세요." });
         return;
@@ -26,7 +28,6 @@ export class AuthController {
       next(error);
     }
     try {
-      const { email, password } = req.body;
       await authService.register(email, password);
 
       res.status(StatusCodes.OK).json({
