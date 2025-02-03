@@ -9,7 +9,7 @@ dotenv.config();
 
 // S3 객체 생성
 const s3 = new S3Client({
-  region: process.env.REGION,
+  region:`${process.env.REGION}`,
   credentials: {
     accessKeyId: `${process.env.ACCESS_KEY}`,
     secretAccessKey: `${process.env.SECRET_KEY}`,
