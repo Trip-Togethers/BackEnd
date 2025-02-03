@@ -11,7 +11,9 @@ import authRoutes from './src/routes/auth.routes';
 import googleAuthRoutes from './src/auth/googleAuth.routes';
 import profileRoutes from './src/routes/profile.routes';
 import mapsRouter from './src/routes/maps.routes';
+import uploadRouter from './src/routes/upload.routes';
 import { TableType } from "typeorm/metadata/types/TableTypes.js";
+
 
 // dotenv 모듈 로드
 dotenv.config();
@@ -58,3 +60,4 @@ app.use("/trips/companions", guestPageRouter)       // Guest
 app.use("/calendar", calendarRoutes)                // Calendar
 app.use("/posts", postsRouter)                      // Post
 app.use("/maps", mapsRouter);                       // Map
+app.use("/file", uploadRouter);
