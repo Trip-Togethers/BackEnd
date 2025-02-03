@@ -52,7 +52,7 @@ export class CommunityServices {
               },
               createdAt: post.createdAt,
               likes: likesCount,
-              comments_count: commentsCount,
+              commentsCount: commentsCount,
             };
           } catch (error) {
             return {
@@ -65,7 +65,7 @@ export class CommunityServices {
               },
               createdAt: post.createdAt,
               likes: 0,
-              comments_count: 0,
+              commentsCount: 0,
             };
           }
         })
@@ -163,7 +163,7 @@ export class CommunityServices {
           createdAt: post?.createdAt,
           updatedAt: post?.updatedAt,
           likes: likesCount,
-          comments_count: commentsCount,
+          commentsCount: commentsCount,
         },
       };
     } catch (error) {
