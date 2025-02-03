@@ -11,9 +11,9 @@ export class Invitaion {
     @Column()
     link!: string;
 
-    @Column()
+    @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     invitedAt!: Date;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column()
     createLinkUser!: number;
 }
