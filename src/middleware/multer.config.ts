@@ -10,7 +10,6 @@ dotenv.config();
 // S3 객체 생성
 const s3 = new S3Client({
   region: "us-east-1",
-  endpoint: `${process.env.MINIO_ENDPOINT}`,
   credentials: {
     accessKeyId: `${process.env.MINIO_ACCESS_KEY}`,
     secretAccessKey: `${process.env.MINIO_SECRET_KEY}`,
@@ -25,14 +24,13 @@ export const uploadParams = async (filePath: string, fileName: string) => {
 
     const upload = new Upload({
       client: s3,
-      params: { Bucket: "my-bucket", Key: fileName, Body: fileStream },
+      params: { Bucket: process.env.BUCKET_NAME, Key: fileName, Body: fileStream },
     });
 
     const data = await upload.done();
-    console.log("파일 업로드 성공:", data);
+    console.log("파일 업로드 성공:");
 
-    const fileUrl = `${process.env.MINIO_ENDPOINT}/my-bucket/${fileName}`;
-    console.log("업로드된 파일 URL:", fileUrl);
+    const fileUrl = `${process.env.BUCKET_NAME}/${fileName}`;
 
     // 업로드 완료 후 로컬 파일 삭제
     fs.unlinkSync(filePath); // 로컬 파일 삭제
