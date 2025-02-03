@@ -12,9 +12,6 @@ export class Guest {
   @Column()
   email!: string;
 
-  @Column()
-  inviteCode!: string;
-
   @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
   invitedAt!: Date; // 초대 링크 생성 시점
 

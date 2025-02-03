@@ -9,7 +9,7 @@ export class Invitaion {
     tripId: number;
 
     @Column()
-    link!: string;
+    inviteCode!: string;
 
     @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     invitedAt!: Date;
