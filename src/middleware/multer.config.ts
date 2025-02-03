@@ -4,12 +4,12 @@ import { Upload } from "@aws-sdk/lib-storage";
 import fs from "fs";
 import { S3Client } from "@aws-sdk/client-s3";
 import dotenv from "dotenv"; 
-
+//s
 dotenv.config();
 
 // S3 객체 생성
 const s3 = new S3Client({
-  region:`${process.env.REGION}`,
+  region: `${process.env.REGION}`,
   credentials: {
     accessKeyId: `${process.env.ACCESS_KEY}`,
     secretAccessKey: `${process.env.SECRET_KEY}`,
