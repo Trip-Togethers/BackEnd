@@ -11,7 +11,7 @@ router.post('/register', registerValidation, AuthController.register);
 router.post('/verify-email', AuthController.verifyEmail);
 
 // 이메일 중복 확인
-router.get('/check-email', AuthController.checkEmailDuplicate);
+router.get('/check-email', AuthController.checkEmail);
 
 // 로그인
 router.post('/login', AuthController.login);
