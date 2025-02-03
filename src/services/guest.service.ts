@@ -12,16 +12,20 @@ export const insertInviteLink = async (
   const inviteLinkRepository = AppDataSource.getRepository(Invitaion);
   const scheduleRepository = AppDataSource.getRepository(Schedule);
   
-  const existingCode = await inviteLinkRepository.findOne({
+  // 초대 링크가 존재하는지 확인
+  let existingCode = await inviteLinkRepository.findOne({
     where: {
       link: inviteCode,
     },
-  });
+  })
 
-  if (existingCode) {
+  while (existingCode) {
     const newInviteCode = crypto.randomBytes(16).toString("hex");
-    await insertInviteLink(tripId, newInviteCode, userId); // 재귀 호출
-    return;
+    existingCode = await inviteLinkRepository.findOne({
+      where: {
+        link: newInviteCode,
+      },
+    });
   }
   
   const schedule = await scheduleRepository.findOne({ where: { id: tripId } });
@@ -30,7 +34,7 @@ export const insertInviteLink = async (
     throw new Error("해당 일정을 찾을 수 없습니다.");
   }
   
-  const link = `http://${process.env.ENDPOINT}:${process.env.PORT}/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
+  const link = `${process.env.ENDPOINT}:${process.env.PORT}/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
   // 새 초대 링크 객체 생성
   const newInviteLink = new Invitaion();
   newInviteLink.tripId = tripId;
