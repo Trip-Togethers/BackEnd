@@ -9,12 +9,11 @@ dotenv.config();
 
 // S3 객체 생성
 const s3 = new S3Client({
-  region: "us-east-1",
+  region: `${process.env.REGION}`,
   credentials: {
-    accessKeyId: `${process.env.MINIO_ACCESS_KEY}`,
-    secretAccessKey: `${process.env.MINIO_SECRET_KEY}`,
+    accessKeyId: `${process.env.ACCESS_KEY}`,
+    secretAccessKey: `${process.env.SECRET_KEY}`,
   },
-  forcePathStyle: true, // path style 사용
 });
 
 // S3 객체 사용
@@ -30,7 +29,7 @@ export const uploadParams = async (filePath: string, fileName: string) => {
     const data = await upload.done();
     console.log("파일 업로드 성공:");
 
-    const fileUrl = `${process.env.BUCKET_NAME}/${fileName}`;
+    const fileUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
 
     // 업로드 완료 후 로컬 파일 삭제
     fs.unlinkSync(filePath); // 로컬 파일 삭제
