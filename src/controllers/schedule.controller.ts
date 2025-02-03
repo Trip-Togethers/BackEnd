@@ -287,9 +287,6 @@ export const editTrips = async (req: Request, res:Response) => {
 
   const tripId = Number(req.params.tripId);
   const { startDate, endDate, title, description } = req.body;
-
-  const photoFilePath = handleFileUpload(req);
-  const photoUrl = photoFilePath ? photoFilePath : "";
   const email = req.user?.email;
   if(!email) {
     res.status(StatusCodes.NOT_FOUND).json({
@@ -329,10 +326,11 @@ export const editTrips = async (req: Request, res:Response) => {
       return;
     }
 
-    
-  if (photoFilePath && req.file?.path) {
+    let imageUrl;
+
+  if (req.file?.path) {
     try {
-      await uploadParams(req.file?.path, req.file?.filename);
+      imageUrl = await uploadParams(req.file?.path, req.file?.filename);
     } catch (error) {
       console.error("파일 업로드 실패:", error);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -348,7 +346,7 @@ export const editTrips = async (req: Request, res:Response) => {
     if (endDate) schedule.endDate = new Date(endDate);
     if (title) schedule.title = title;
     if (description) schedule.destination = description;
-    if (photoUrl) schedule.photoUrl = photoUrl;
+    if (imageUrl) schedule.photoUrl = imageUrl;
 
     // 수정된 일정 저장
     await AppDataSource.getRepository(Schedule).save(schedule);
