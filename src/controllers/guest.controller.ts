@@ -151,7 +151,8 @@ export const createInviteLink = async (req: Request, res: Response) => {
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      error: "초대 링크 생성에 실패했습니다.",
+      errors: "초대 링크 생성에 실패했습니다.",
+      error
     });
   }
 };
