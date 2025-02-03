@@ -4,7 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "strict": true,
     "strictPropertyInitialization": false,
     "esModuleInterop": true,     // ES 모듈과 CommonJS 모듈 간의 호환성을 위해 true로 설정
@@ -13,9 +13,8 @@
     "experimentalDecorators": true, // 데코레이터 기능 사용 여부
     "emitDecoratorMetadata": true,  // 데코레이터를 통해 클래스와 속성에 대한 메타데이터 생성 여부
 
-    "typeRoots": ["./src/types", "./node_modules/@types"],
-
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
-  "include": ["src/**/*.ts", "src/types/express/*.d.ts"],     // 컴파일할 TypeScript 파일이 포함된 경로
+  "include": ["index.ts", "src/**/*.ts", "src/types/express/*.d.ts"],     // 컴파일할 TypeScript 파일이 포함된 경로
   "exclude": ["node_modules"]     // 컴파일에서 제외할 폴더
 }
