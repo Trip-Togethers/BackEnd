@@ -63,7 +63,7 @@ export class AuthController {
       const { email, password } = req.body;
       const token = await authService.login(email, password);
       // 토큰 쿠키에 담기
-      res.cookie("Authorization", token, {
+      res.cookie("token", token, {
         httpOnly: true,
       });
       res.status(StatusCodes.OK).json({ message: "로그인 성공", token });
@@ -80,7 +80,7 @@ export class AuthController {
     try {
       const token = req.headers.authorization?.split(" ")[1] || "";
       await authService.logout(token);
-      res.clearCookie("Authorization", {
+      res.clearCookie("token", {
         httpOnly: true,
       })
       res.status(StatusCodes.OK).json({ message: "로그아웃 되었습니다." });
