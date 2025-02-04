@@ -21,6 +21,13 @@ export const insertMaps = async (req: Request, res: Response) => {
         return;
     }
 
-    const map = await calendarServices.insertMaps(req.body);
+    const userId = req.user?.userId;
+    if (!userId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "사용자를 찾을 수 없습니다." });
+      }
+
+    const map = await calendarServices.insertMaps(req.body, userId);
     res.json(map);
 };
