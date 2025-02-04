@@ -4,19 +4,26 @@ import { GetCalendarByIdParams } from '../types/params.type';
 import { StatusCodes } from 'http-status-codes';
 
 export class calendarServices {
-    static async getMaps(params: GetCalendarByIdParams) {
-        const userId = Number(params.userId);
-        const mapRepository = AppDataSource.getRepository(Maps);
+    static async getMaps(userId: number) {
+        try {
+            const mapRepository = AppDataSource.getRepository(Maps);
 
-        const maps = await mapRepository.find({
-            where: { userId: userId },
-        });
+            const maps = await mapRepository.find({
+                where: { userId: userId },
+            });
 
-        return {
-            message: '목적지 불러오기 완료',
-            statusCode: StatusCodes.OK,
-            destinations: maps,
-        };
+            return {
+                message: '목적지 불러오기 완료',
+                statusCode: StatusCodes.OK,
+                destinations: maps,
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                message: '목적지 불러오기 중 오류가 발생했습니다.',
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            };
+        }
     }
 
     static async insertMaps(params: { [key: string]: any }, userId: number) {

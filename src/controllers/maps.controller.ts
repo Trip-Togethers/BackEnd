@@ -5,8 +5,15 @@ import { StatusCodes } from 'http-status-codes';
 import { validateInsertMap } from '../middleware/map.validators';
 import { validationResult } from 'express-validator';
 
-export const getMaps = async (req: Request<GetCalendarByIdParams>, res: Response) => {
-    const map = await calendarServices.getMaps(req.params);
+export const getMaps = async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
+    if (!userId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "사용자를 찾을 수 없습니다." });
+    }
+    
+    const map = await calendarServices.getMaps(userId);
     res.json(map);
 };
 
