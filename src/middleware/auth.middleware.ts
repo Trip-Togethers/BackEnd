@@ -4,17 +4,20 @@ import { StatusCodes } from 'http-status-codes';
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.cookies.token;
+    console.log(authHeader)
     if (!authHeader) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: '로그인 후 이용해주세요.' });
       return;
     }
 
     const token = authHeader
+    console.log(token)
     if (!token) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: '토큰 형식이 잘못되었습니다.' });
       return;
     }
+    console.log('Token V')
 
     const decoded = verifyToken(token);
     if (!decoded) {

@@ -12,12 +12,15 @@ import googleAuthRoutes from './src/auth/googleAuth.routes';
 import mapsRouter from './src/routes/maps.routes';
 import { TableType } from "typeorm/metadata/types/TableTypes.js";
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 // dotenv 모듈 로드
 dotenv.config();
 
 // express 앱 초기화
 const app = express();
+// 쿠키
+app.use(cookieParser());
 // CORS 설정
 const corsOptions = {
   origin: ["http://localhost:5173"],
