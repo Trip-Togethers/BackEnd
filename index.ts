@@ -11,12 +11,29 @@ import authRoutes from './src/routes/auth.routes';
 import googleAuthRoutes from './src/auth/googleAuth.routes';
 import mapsRouter from './src/routes/maps.routes';
 import { TableType } from "typeorm/metadata/types/TableTypes.js";
+import cors from 'cors';
 
 // dotenv 모듈 로드
 dotenv.config();
 
 // express 앱 초기화
 const app = express();
+// CORS 설정
+const corsOptions = {
+  origin: ["http://localhost:5173"],
+  credentials: true, // withCredentials: true를 허용
+};
+
+app.use(cors(corsOptions));
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, Set-Cookie, set-cookie"
+  );
+  next();
+});
 
 // JSON 바디 파싱 미들웨어 추가
 app.use(express.json());
