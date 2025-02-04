@@ -7,7 +7,7 @@ export class Maps {
     id: number;
 
     @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'userId' })
+    @JoinColumn({ name: 'user_id' })
     user: User;
     
     @Column({ type: 'int', unsigned: true })
