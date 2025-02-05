@@ -19,16 +19,17 @@ dotenv.config();
 
 // express 앱 초기화
 const app = express();
-// 쿠키
+
 app.use(cookieParser());
-// CORS 설정
+
 const corsOptions = {
-  origin: ["http://localhost:5173"],
-  credentials: true, // withCredentials: true를 허용
+  origin: ["http://localhost:5173"], // 허용할 프론트엔드 도메인
+  credentials: true,               // 쿠키 허용
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); 
 
+// 프리플라이트 요청 허용
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header(
@@ -37,7 +38,6 @@ app.use((req, res, next) => {
   );
   next();
 });
-
 // JSON 바디 파싱 미들웨어 추가
 app.use(express.json());
 
