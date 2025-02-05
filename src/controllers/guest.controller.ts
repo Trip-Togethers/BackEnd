@@ -26,17 +26,22 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
   const guestId = req.user?.userId; // 동행자 아이디
   const email = req.user?.email;
   if (!email || !guestId) {
-    res.status(StatusCodes.NOT_FOUND).json({
-      message: "해당 이메일 또는 아이디를 찾을 수 없습니다.",
-    });
+
+    res.status(StatusCodes.NOT_FOUND).send(renderHTML("해당 이메일 또는 아이디를 찾을 수 없습니다."));
+
+    // res.status(StatusCodes.NOT_FOUND).json({
+    //   message: "해당 이메일 또는 아이디를 찾을 수 없습니다.",
+    // });
     return;
   }
 
   try {
     if (guestId === Number(userId)) {
-      res.status(StatusCodes.BAD_REQUEST).json({
-        message: "초대자는 동행자로 추가될 수 없습니다.",
-      });
+      res.status(StatusCodes.BAD_REQUEST).send(renderHTML("초대자는 동행자로 추가될 수 없습니다."));
+
+      // res.status(StatusCodes.BAD_REQUEST).json({
+      //   message: "초대자는 동행자로 추가될 수 없습니다.",
+      // });
       return;
     }
 
@@ -62,9 +67,11 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
 
     // 초대 링크가 유효하지 않거나, 해당 초대 코드가 없을 경우
     if (existingGuest) {
-      res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "이미 동행자로 추가된 사용자입니다." });
+      res.status(StatusCodes.BAD_REQUEST).send(renderHTML("이미 동행자로 추가된 사용자입니다."));
+
+      // res
+      //   .status(StatusCodes.BAD_REQUEST)
+      //   .json({ message: "이미 동행자로 추가된 사용자입니다." });
       return;
     }
 
@@ -73,9 +80,11 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
     });
     // 메인 일정이 없으면 오류 처리
     if (!mainSchedule) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        message: "메인 일정을 찾을 수 없습니다.",
-      });
+      res.status(StatusCodes.NOT_FOUND).send(renderHTML("메인 일정을 찾을 수 없습니다."));
+
+      // res.status(StatusCodes.NOT_FOUND).json({
+      //   message: "메인 일정을 찾을 수 없습니다.",
+      // });
       return;
     }
     if (!guest) {
@@ -91,20 +100,24 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
       await guestRepository.save(newGuest);
 
       console.log(mainSchedule);
-      res.status(StatusCodes.OK).json({
-        message: "동행자가 여행 일정에 성공적으로 추가되었습니다.",
-        guest: {
-          userId: newGuest.userId,
-          email: email,
-          acceptedAt: newGuest.acceptedAt,
-        },
-      });
+      res.status(StatusCodes.OK).send(renderHTML("동행자가 여행 일정에 성공적으로 추가되었습니다."));
+
+      // res.status(StatusCodes.OK).json({
+      //   message: "동행자가 여행 일정에 성공적으로 추가되었습니다.",
+      //   guest: {
+      //     userId: newGuest.userId,
+      //     email: email,
+      //     acceptedAt: newGuest.acceptedAt,
+      //   },
+      // });
     }
   } catch (error) {
     console.error(error);
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "동행자를 추가하는 중에 오류가 발생했습니다." });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(renderHTML("동행자를 추가하는 중에 오류가 발생했습니다."));
+
+    // res
+    //   .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    //   .json({ message: "동행자를 추가하는 중에 오류가 발생했습니다." });
   }
 };
 
@@ -272,3 +285,22 @@ export const lookUpUserList = async (req: Request, res: Response) => {
     });
   }
 };
+
+const renderHTML = (msg: String) => {
+  return `
+      <!DOCTYPE html>
+      <html lang="ko">
+      <head>
+        <meta charset="UTF-8">
+        <title>초대 링크</title>
+        <script>
+          window.onload = function() {
+            alert("${msg}");
+            window.location.href = "${process.env.CLIENT_ADDRESS}";
+          }
+        </script>
+      </head>
+      <body></body>
+      </html>
+    `
+}
