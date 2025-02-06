@@ -20,6 +20,7 @@ const AppDataSource = new DataSource({
   entities: [User, Token, Schedule, Detaile, Guest, Posts, Comments, Likes, Invitaion, Maps],
   synchronize: true,
   logging: false,
+  timezone: '+09:00'
 });
 
 export default AppDataSource;

@@ -107,6 +107,8 @@ export const addTrips = async (req: Request, res: Response) => {
   const putStartDate = new Date(startDate);
   const putEndDate = new Date(endDate);
 
+  console.log(putEndDate)
+  console.log(putStartDate)
   const email = req.user?.email;
   const owner = req.user?.userId;
 
