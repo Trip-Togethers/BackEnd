@@ -491,9 +491,6 @@ export class CommunityServices {
           statusCode: StatusCodes.NOT_FOUND,
         };
       }
-
-      console.log(existingComment.userId)
-      console.log(userId)
       // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
       if (existingComment.userId !== userId) {
         return {

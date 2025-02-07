@@ -60,7 +60,6 @@ export class UserController {
       })
       return;
     }
-    console.log(userId, loggedInUserId)
 
     const isValid = await UserController.findUser(userId, loggedInUserId);
     if (!isValid) {

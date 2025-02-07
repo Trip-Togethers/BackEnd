@@ -55,7 +55,6 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
       },
       relations: ["schedule"],
     });
-    console.log(guest);
 
     // 이미 동행자로 추가된 유저인지 확인
     const existingGuest = await guestRepository.findOne({
@@ -99,17 +98,15 @@ export const addGuestToSchedule = async (req: Request, res: Response) => {
       // 데이터베이스에 저장 (동행자 정보 업데이트)
       await guestRepository.save(newGuest);
 
-      console.log(mainSchedule);
       res.status(StatusCodes.OK).send(renderHTML("동행자가 여행 일정에 성공적으로 추가되었습니다."));
 
-      // res.status(StatusCodes.OK).json({
-      //   message: "동행자가 여행 일정에 성공적으로 추가되었습니다.",
-      //   guest: {
-      //     userId: newGuest.userId,
-      //     email: email,
-      //     acceptedAt: newGuest.acceptedAt,
-      //   },
-      // });
+      res.status(StatusCodes.OK).json({
+        guest: {
+          userId: newGuest.userId,
+          email: email,
+          acceptedAt: newGuest.acceptedAt,
+        },
+      });
     }
   } catch (error) {
     console.error(error);

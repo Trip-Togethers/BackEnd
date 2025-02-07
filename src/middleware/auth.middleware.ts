@@ -4,19 +4,21 @@ import { StatusCodes } from 'http-status-codes';
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const authHeader = req.cookies.token;
+    const authHeader = req.headers.authorization;
     if (!authHeader) {
-      res.status(StatusCodes.UNAUTHORIZED).json({ message: '로그인 후 이용해주세요.' });
-      return;
+     res.status(StatusCodes.UNAUTHORIZED).json({ message: '인증 토큰이 필요합니>다.' });
+     return;
     }
 
-    const token = authHeader
+   // "Bearer <토큰>" 형식에서 실제 토큰 추출
+    const token = authHeader.split(' ')[1];
     if (!token) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: '토큰 형식이 잘못되었습니다.' });
       return;
     }
 
     const decoded = verifyToken(token);
+
     if (!decoded) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: '유효하지 않은 토큰입니다.' });
       return;
@@ -26,7 +28,6 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
       userId: decoded.userId,
       email: decoded.email
     }
-    console.log(req.user)
     next();
   } catch (error: any) {
     console.error(error);
