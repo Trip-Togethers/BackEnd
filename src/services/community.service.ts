@@ -465,24 +465,20 @@ export class CommunityServices {
       }
 
       // 댓글 내용 수정
-      await commentRepository.update(
-        { id: commentId },
-        { content: comment } // 수정할 댓글 내용
-      );
+      await commentRepository.update(commentId, { content: comment });
 
-      // 수정된 댓글 정보 반환
-      const updatedComment = await commentRepository.findOne({
-        where: { id: commentId },
-      });
+      // // 수정된 댓글 정보 반환
+      // const updatedComment = await commentRepository.findOne({
+      //   where: { id: commentId },
+      // });
 
       return {
         message: "댓글 수정 완료",
         statusCode: StatusCodes.OK,
         comment: {
           id: commentId,
-          content: updatedComment?.content,
-          createdAt: updatedComment?.createdAt,
-          updatedAt: updatedComment?.updatedAt,
+          content: comment, // 이미 수정된 content를 반환
+          updatedAt: new Date(), // 수정된 시간
         },
       };
     } catch (error) {
@@ -528,10 +524,7 @@ export class CommunityServices {
         };
       }
 
-      const comment = await commentRepository.delete({
-        id: postId,
-        user: user,
-      });
+      await commentRepository.delete(postId);
 
       return {
         message: "댓글 삭제 완료",
