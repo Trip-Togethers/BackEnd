@@ -6,7 +6,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-     res.status(StatusCodes.UNAUTHORIZED).json({ message: '인증 토큰이 필요합니>다.' });
+     res.status(StatusCodes.UNAUTHORIZED).json({ message: '인증 토큰이 필요합니다.' });
      return;
     }
 
