@@ -342,14 +342,23 @@ export class CommunityServices {
             };
 
             return {
-              message: "댓글 불러오기 완료",
-              statusCode: StatusCodes.OK,
-              posts: results,
+              id: comment.id,
+              content: comment.content,
+              author: {
+                nick: author.name,
+                profile: author.profilePicture,
+              },
+              createdAt: comment.createdAt,
             };
           } catch (error) {
             return {
-              message: "댓글 불러오기 중 오류가 발생했습니다.",
-              statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+              id: comment.id,
+              content: comment.content,
+              author: {
+                nick: "익명", // nickname을 사용할 수 없으면 익명
+                profile: "",
+              },
+              createdAt: comment.createdAt,
             };
           }
         })
