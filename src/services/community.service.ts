@@ -337,28 +337,19 @@ export class CommunityServices {
           try {
             // 작성자 정보 가져오기
             const author = {
-              name: comment?.user?.nickname || "익명",
-              profile_picture: comment?.user?.profilePicture || "",
+              name: comment?.nickname || "익명", // nickname을 바로 사용
+              profilePicture: comment?.user?.profilePicture || "", // 프로필 사진
             };
 
             return {
-              id: comment.id,
-              content: comment.content,
-              author: {
-                nick: author.name,
-                profile: author.profile_picture,
-              },
-              createdAt: comment.createdAt,
+              message: "댓글 불러오기 완료",
+              statusCode: StatusCodes.OK,
+              posts: results,
             };
           } catch (error) {
             return {
-              id: comment.id,
-              content: comment.content,
-              author: {
-                nick: "익명",
-                profile: "",
-              },
-              createdAt: comment.createdAt,
+              message: "댓글 불러오기 중 오류가 발생했습니다.",
+              statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
             };
           }
         })
@@ -404,19 +395,19 @@ export class CommunityServices {
       }
 
       // 사용자의 닉네임 조회
-    const user = await userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      return {
-        message: "사용자 정보를 찾을 수 없습니다.",
-        statusCode: StatusCodes.NOT_FOUND,
-      };
-    }
+      const user = await userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        return {
+          message: "사용자 정보를 찾을 수 없습니다.",
+          statusCode: StatusCodes.NOT_FOUND,
+        };
+      }
 
       const newCommentst = new Comments();
-      (newCommentst.postId = postId),
-        (newCommentst.userId = userId),
-        (newCommentst.content = comment);
-        (newCommentst.nickname = user.nickname);
+      newCommentst.postId = postId;
+      newCommentst.userId = userId;
+      newCommentst.content = comment;
+      newCommentst.nickname = user.nickname; // nickname 저장
 
       const savedComment = await commentRepository.save(newCommentst);
 
@@ -427,7 +418,7 @@ export class CommunityServices {
           content: savedComment.content,
           createdAt: savedComment.createdAt,
           author: {
-            nick: user.nickname,  // 사용자의 닉네임 추가
+            nick: savedComment.nickname || "익명", // 사용자의 닉네임 추가
             profile: user.profilePicture || "", // 사용자 프로필 이미지 추가 (없을 경우 빈 문자열)
           },
         },
