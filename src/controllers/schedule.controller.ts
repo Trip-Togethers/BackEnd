@@ -4,7 +4,7 @@ import { insertSchedule } from "../services/schedule.service";
 import AppDataSource from "../data-source";
 import { Schedule } from "../entities/schedule.entity";
 import { validationResult } from "express-validator";
-import { uploadParams } from "../middleware/multer.config";
+import { deleteFileFromS3, uploadParams } from "../middleware/multer.config";
 import { validateAddTrip, validateDeleteTripId, validateEditTrip } from "../middleware/schedule.validators";
 import { error } from "console";
 import { User } from "../entities/user.entity";
@@ -203,12 +203,12 @@ export const removeTrips = async (req: Request, res: Response) => {
 
     // 일정이 존재하지 않으면 에러
     if (!schedule) {
-       res.status(StatusCodes.NOT_FOUND).json({
+      res.status(StatusCodes.NOT_FOUND).json({
         message: "해당 일정이 존재하지 않습니다.",
       });
       return;
     }
-    
+
     // 이메일로 사용자 조회
     const user = await userRepository.findOne({
       where: { email: email },
@@ -225,7 +225,7 @@ export const removeTrips = async (req: Request, res: Response) => {
     if (schedule.owner === userId) {
       await scheduleRepository.delete(tripId);
 
-       res.status(StatusCodes.OK).json({
+      res.status(StatusCodes.OK).json({
         message: "일정이 성공적으로 삭제되었습니다.",
       });
       return;
@@ -238,32 +238,38 @@ export const removeTrips = async (req: Request, res: Response) => {
       relations: ["schedule"],
     });
 
-      // 동행자가 초대받은 일정이 없으면 에러
-      if (!guest) {
-        res.status(StatusCodes.NOT_FOUND).json({
-          message: "동행자가 초대받은 일정이 없습니다.",
-        });
-        return;
-      }
+    // 동행자가 초대받은 일정이 없으면 에러
+    if (!guest) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "동행자가 초대받은 일정이 없습니다.",
+      });
+      return;
+    }
 
-      if (!guest || guest.schedule.id !== tripId) {
-         res.status(StatusCodes.FORBIDDEN).json({
-          message: "초대받지 않은 일정을 삭제할 수 없습니다.",
-        });
-        return;
-      }
-      
-      // 동행자만 해당 일정 삭제
+    if (!guest || guest.schedule.id !== tripId) {
+      res.status(StatusCodes.FORBIDDEN).json({
+        message: "초대받지 않은 일정을 삭제할 수 없습니다.",
+      });
+      return;
+    }
+
+    // S3 이미지 삭제
+    const fileName = schedule.photoUrl.split("/").pop(); // URL에서 파일 이름 추출
+    if (fileName) {
+      await deleteFileFromS3(fileName); // S3에서 파일 삭제
+    }
+    
+    // 동행자만 해당 일정 삭제
     await guestRepository.delete({
       email: email,
       schedule: { id: tripId },
     });
 
-      res.status(StatusCodes.OK).json({
-        message: "동행자의 일정 삭제가 완료되었습니다.",
-      });
+    res.status(StatusCodes.OK).json({
+      message: "동행자의 일정 삭제가 완료되었습니다.",
+    });
 
-      return;
+    return;
   } catch (findError) {
     console.error("일정 조회 중 오류 발생:", findError);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
