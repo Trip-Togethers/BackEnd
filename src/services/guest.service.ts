@@ -34,7 +34,8 @@ export const insertInviteLink = async (
     throw new Error("해당 일정을 찾을 수 없습니다.");
   }
   
-  const link = `${process.env.ENDPOINT}:${process.env.PORT}/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
+    const link = `${process.env.ENDPOINT}:${process.env.PORT}/trips/companions/${tripId}/invite/${userId}/${inviteCode}`;
+
   // 새 초대 링크 객체 생성
   const newInviteLink = new Invitaion();
   newInviteLink.tripId = tripId;

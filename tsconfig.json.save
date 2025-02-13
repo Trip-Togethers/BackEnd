@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": ".",
-
+    "strict": true,
     "strictPropertyInitialization": false,
     "esModuleInterop": true,     // ES 모듈과 CommonJS 모듈 간의 호환성을 위해 true로 설정
     "skipLibCheck": true,        // 라이브러리 파일 검사 생략 (속도 향상)
