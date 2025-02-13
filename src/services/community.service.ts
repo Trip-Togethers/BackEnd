@@ -337,7 +337,7 @@ export class CommunityServices {
           try {
             // 작성자 정보 가져오기
             const author = {
-              name: comment?.user?.nickname || "Unknown",
+              name: comment?.user?.nickname || "익명",
               profile_picture: comment?.user?.profilePicture || "",
             };
 
@@ -355,7 +355,7 @@ export class CommunityServices {
               id: comment.id,
               content: comment.content,
               author: {
-                nick: "Unknown",
+                nick: "익명",
                 profile: "",
               },
               createdAt: comment.createdAt,
@@ -416,6 +416,7 @@ export class CommunityServices {
       (newCommentst.postId = postId),
         (newCommentst.userId = userId),
         (newCommentst.content = comment);
+        (newCommentst.nickname = user.nickname);
 
       const savedComment = await commentRepository.save(newCommentst);
 

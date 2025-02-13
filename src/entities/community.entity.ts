@@ -63,6 +63,10 @@ export class Comments {
 
     @UpdateDateColumn({ type: 'datetime', nullable: true })
     updatedAt: Date | null;
+
+    // nickname 필드를 추가
+  @Column({ nullable: true })
+  nickname?: string;
 }
 
 @Entity('likes')
