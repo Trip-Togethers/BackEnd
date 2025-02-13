@@ -489,7 +489,7 @@ export class CommunityServices {
     }
   }
 
-  static async deleteComment(postId: number, userId: number) {
+  static async deleteComment(commentId: number,postId: number, userId: number) {
     const commentRepository = AppDataSource.getRepository(Comments);
 
     try {
@@ -524,7 +524,7 @@ export class CommunityServices {
         };
       }
 
-      await commentRepository.delete(postId);
+      await commentRepository.delete({ id: commentId });
 
       return {
         message: "댓글 삭제 완료",

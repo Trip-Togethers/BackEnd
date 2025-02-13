@@ -236,7 +236,7 @@ export const updateComment = async (req: Request, res: Response) => {
 
 export const deleteComment = async (req: Request, res: Response) => {
   const postId = parseInt(req.params.postId);
-
+  const commentId = parseInt(req.params.commentId);
   if (isNaN(postId)) {
     return res.status(400).json({ message: "유효하지 않은 게시글 ID입니다." });
   }
@@ -249,7 +249,7 @@ export const deleteComment = async (req: Request, res: Response) => {
       .json({ message: "사용자를 찾을 수 없습니다." });
   }
 
-  const comment = await CommunityServices.deleteComment(postId, userId);
+  const comment = await CommunityServices.deleteComment(postId, userId, commentId);
   res.status(comment.statusCode).json({
     comment
   });
