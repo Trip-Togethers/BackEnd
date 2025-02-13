@@ -360,7 +360,7 @@ export const editTrips = async (req: Request, res:Response) => {
         startDate: schedule.startDate,
         endDate: schedule.endDate,
         title: schedule.title,
-        description: schedule.destination,
+        destination: schedule.destination,
       },
     });
   } catch (error) {

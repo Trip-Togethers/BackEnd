@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import AppDataSource from "../data-source";
 import { Posts, Comments, Likes } from "../entities/community.entity";
 import { User } from "../entities/user.entity";
-
+import { deleteFileFromS3 } from "../middleware/multer.config";
 export class CommunityServices {
   static async getAllPosts() {
     try {
@@ -166,7 +166,7 @@ export class CommunityServices {
           likes: likesCount,
           comments_count: commentsCount,
           tripId: post.tripId
-        },
+	},
       };
     } catch (error) {
       return {
@@ -183,6 +183,7 @@ export class CommunityServices {
       // 게시글 조회
       const post = await postRepository.findOne({ where: { id: postId } });
 
+      console.log(post)
       // 게시글이 존재하지 않거나, 게시글 작성자가 userId와 다른경우
       if (!post) {
         return {
@@ -198,19 +199,12 @@ export class CommunityServices {
         };
       }
 
-      // 여행 일정 수정
-    // if (params.) schedule.startDate = new Date(startDate);
-    // if (endDate) schedule.endDate = new Date(endDate);
-    // if (title) schedule.title = title;
-    // if (description) schedule.destination = description;
-    // if (imageUrl) schedule.photoUrl = imageUrl;
       if (params.postTitle) post.postTitle = params.postTitle
       if (params.imageUrl) post.postPhotoUrl = params.imageUrl
-      if (params.postContent) post.postContent = params.postContent
+      if (params.postContent) post.postContent = params.postContent      
       if (params.tripId) post.tripId = params.tripId
       
       await AppDataSource.getRepository(Posts).save(post);
-      //await postRepository.update({ id: postId }, params);
 
       return {
         message: "게시글 수정 완료",
@@ -252,6 +246,12 @@ export class CommunityServices {
             "삭제 권한이 없습니다. 다른 사용자의 게시글은 삭제할 수 없습니다.",
           statusCode: StatusCodes.FORBIDDEN,
         };
+      }
+
+      // S3 이미지 삭제
+      const fileName = post.postPhotoUrl.split("/").pop(); // URL에서 파일 이름 추출
+      if (fileName) {
+        await deleteFileFromS3(fileName); // S3에서 파일 삭제
       }
 
       await postRepository.delete({ id: postId });

@@ -8,9 +8,10 @@ export class Posts {
 
     @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
+    
     user: User;
+    @Column({ type: 'int', nullable: true })
 
-    @Column({ type: 'int' })
     tripId?: number;
 
     @Column({ type: 'varchar', length: 255, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })

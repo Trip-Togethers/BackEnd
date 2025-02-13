@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import { Upload } from "@aws-sdk/lib-storage";
 import fs from "fs";
-import { S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import dotenv from "dotenv"; 
 //s
 dotenv.config();
@@ -30,6 +30,8 @@ export const uploadParams = async (filePath: string, fileName: string) => {
     console.log("파일 업로드 성공:");
 
     const fileUrl = `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/${fileName}`;
+
+	console.log(fileUrl);
 
     // 업로드 완료 후 로컬 파일 삭제
     fs.unlinkSync(filePath); // 로컬 파일 삭제
@@ -68,5 +70,21 @@ const fileFilter = (
 export const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 파일 크기 제한
+  limits: { fileSize: 10 * 1024 * 1024 }, // 파일 크기 제한
 });
+
+// S3에서 파일 삭제하는 함수
+export const deleteFileFromS3 = async (fileName: string) => {
+  try {
+    const deleteParams = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: fileName, // S3에 저장된 파일의 Key
+    };
+
+    const command = new DeleteObjectCommand(deleteParams);
+    await s3.send(command);
+    console.log(`파일 삭제 성공: ${fileName}`);
+  } catch (err) {
+    console.error("파일 삭제 실패:", err);
+  }
+};
