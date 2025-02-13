@@ -221,7 +221,6 @@ export const removeTrips = async (req: Request, res: Response) => {
       return;
     }
 
-    
     // S3 이미지 삭제
     const fileName = schedule.photoUrl.split("/").pop(); // URL에서 파일 이름 추출
     if (fileName) {
@@ -263,6 +262,10 @@ export const removeTrips = async (req: Request, res: Response) => {
       return;
     }
 
+<<<<<<< HEAD
+       
+=======
+>>>>>>> 3945bb384cff8d2884db2381e1df795c533da3c4
     // 동행자만 해당 일정 삭제
     await guestRepository.delete({
       email: email,
