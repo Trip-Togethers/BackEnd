@@ -384,6 +384,7 @@ export class CommunityServices {
   ) {
     const postRepository = AppDataSource.getRepository(Posts);
     const commentRepository = AppDataSource.getRepository(Comments);
+    const userRepository = AppDataSource.getRepository(User);
     try {
       const post = await postRepository.findOne({ where: { id: postId } });
 
@@ -402,6 +403,15 @@ export class CommunityServices {
         };
       }
 
+      // 사용자의 닉네임 조회
+    const user = await userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      return {
+        message: "사용자 정보를 찾을 수 없습니다.",
+        statusCode: StatusCodes.NOT_FOUND,
+      };
+    }
+
       const newCommentst = new Comments();
       (newCommentst.postId = postId),
         (newCommentst.userId = userId),
@@ -415,6 +425,10 @@ export class CommunityServices {
         comment: {
           content: savedComment.content,
           createdAt: savedComment.createdAt,
+          author: {
+            nick: user.nickname,  // 사용자의 닉네임 추가
+            profile: user.profilePicture || "", // 사용자 프로필 이미지 추가 (없을 경우 빈 문자열)
+          },
         },
       };
     } catch (error) {
