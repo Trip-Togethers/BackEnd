@@ -50,6 +50,7 @@ export class CommunityServices {
                 nick: author.name,
                 profile: author.profilePicture,
               },
+              tripId: post.tripId,
               createdAt: post.createdAt,
               likes: likesCount,
               comments_count: commentsCount,
@@ -89,11 +90,11 @@ export class CommunityServices {
 
     try {
       const newPost = new Posts();
+      newPost.tripId = params.tripId;
       newPost.postTitle = params.postTitle;
       newPost.postPhotoUrl = params.imageUrl;
       newPost.postContent = params.postContent;
       newPost.userId = params.userId;
-      newPost.tripId = params.tripId;
 
       await postRepository.save(newPost);
       return {
@@ -164,6 +165,7 @@ export class CommunityServices {
           updatedAt: post?.updatedAt,
           likes: likesCount,
           comments_count: commentsCount,
+          tripId: post.tripId
         },
       };
     } catch (error) {
@@ -196,7 +198,19 @@ export class CommunityServices {
         };
       }
 
-      await postRepository.update({ id: postId }, params);
+      // 여행 일정 수정
+    // if (params.) schedule.startDate = new Date(startDate);
+    // if (endDate) schedule.endDate = new Date(endDate);
+    // if (title) schedule.title = title;
+    // if (description) schedule.destination = description;
+    // if (imageUrl) schedule.photoUrl = imageUrl;
+      if (params.postTitle) post.postTitle = params.postTitle
+      if (params.imageUrl) post.postPhotoUrl = params.imageUrl
+      if (params.postContent) post.postContent = params.postContent
+      if (params.tripId) post.tripId = params.tripId
+      
+      await AppDataSource.getRepository(Posts).save(post);
+      //await postRepository.update({ id: postId }, params);
 
       return {
         message: "게시글 수정 완료",

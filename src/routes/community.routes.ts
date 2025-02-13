@@ -33,7 +33,7 @@ router
 router
   .route("/:postId")
   .get(asyncHandler(getPostById)) // 게시글 상세보기
-  .put(authMiddleware, asyncHandler(updatePostById)) // 게시글 수정하기
+  .put(authMiddleware, upload.single("image"), asyncHandler(updatePostById)) // 게시글 수정하기
   .delete(authMiddleware, asyncHandler(deletePostById)); // 게시글 삭제하기
 
 router.route("/:postId/like").post(authMiddleware, asyncHandler(likePost)); // 좋아요 추가 및 취소

@@ -43,8 +43,9 @@ export const createPost = async (req: Request, res: Response) => {
   }
 
   // req.body에서 trip_id를 가져와서 postParams에 포함
-  const { postTitle, postContent } = req.body;
+  const { tripId, postTitle, postContent } = req.body;
   const postParams = {
+    tripId,
     postTitle,
     imageUrl,
     postContent,
