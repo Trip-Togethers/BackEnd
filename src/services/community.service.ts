@@ -494,10 +494,12 @@ export class CommunityServices {
 
     try {
       const userRepository = AppDataSource.getRepository(User);
+      console.log("사용자의 아이디 파람:", userId)
       const user = await userRepository.findOne({
         where: { id: userId },
       });
 
+      console.log("사용자의 아이디를 통한 사용자 정보 조회:", user)
       if (!user) {
         return {
           message: "사용자를 찾을 수 없습니다.",
