@@ -24,4 +24,13 @@ export class Maps {
 
     @CreateDateColumn({ type: 'datetime' })
     createdAt: Date;
+
+    @Column({ type: 'float', nullable: true })
+    rating: number; // 평점
+
+    @Column({ type: 'varchar', length: 255, nullable: true, charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
+    vicinity: string; // 지역
+
+    @Column('simple-array', { nullable: true })
+    photos: string[]; // 사진 URLs (배열로 저장)
 }

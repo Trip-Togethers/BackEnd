@@ -29,8 +29,22 @@ export class calendarServices {
     static async insertMaps(params: { [key: string]: any }, userId: number) {
         const mapRepository = AppDataSource.getRepository(Maps);
         try {
+            // 기본적으로 userId를 추가
             params.userId = userId;
-            const savedMap = await mapRepository.save(params);
+    
+            // 엔티티에 맞는 데이터 포맷으로 변환
+            const mapData = {
+                name: params.name,
+                latitude: params.latitude,
+                longitude: params.longitude,
+                rating: params.rating || null, // 평점이 없으면 null
+                vicinity: params.vicinity || null, // 지역 정보가 없으면 null
+                photos: params.photos || [], // 사진이 없으면 빈 배열
+                userId: params.userId,
+            };
+    
+            // Maps 엔티티에 저장
+            const savedMap = await mapRepository.save(mapData);
             return {
                 message: '목적지 저장 완료',
                 statusCode: StatusCodes.OK,
