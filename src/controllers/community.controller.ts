@@ -249,7 +249,7 @@ export const deleteComment = async (req: Request, res: Response) => {
       .json({ message: "사용자를 찾을 수 없습니다." });
   }
 
-  const comment = await CommunityServices.deleteComment(postId, userId, commentId);
+  const comment = await CommunityServices.deleteComment(commentId, postId, userId);
   res.status(comment.statusCode).json({
     comment
   });
