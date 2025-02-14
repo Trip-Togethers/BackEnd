@@ -183,7 +183,6 @@ export class CommunityServices {
       // 게시글 조회
       const post = await postRepository.findOne({ where: { id: postId } });
 
-      console.log(post)
       // 게시글이 존재하지 않거나, 게시글 작성자가 userId와 다른경우
       if (!post) {
         return {
@@ -331,6 +330,7 @@ export class CommunityServices {
         relations: ["user"],
         where: { postId: postId },
       });
+      console.log("가져온 댓글 데이터:", comments);
 
       const results = await Promise.all(
         comments.map(async (comment) => {
@@ -494,12 +494,10 @@ export class CommunityServices {
 
     try {
       const userRepository = AppDataSource.getRepository(User);
-      console.log("사용자의 아이디 파람:", userId)
       const user = await userRepository.findOne({
         where: { id: userId },
       });
 
-      console.log("사용자의 아이디를 통한 사용자 정보 조회:", user)
       if (!user) {
         return {
           message: "사용자를 찾을 수 없습니다.",
