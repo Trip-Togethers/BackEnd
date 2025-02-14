@@ -413,6 +413,7 @@ export class CommunityServices {
       }
       
       const newCommentst = new Comments();
+      newCommentst.user = user;
       newCommentst.postId = postId;
       newCommentst.userId = user.id;
       newCommentst.content = comment;
