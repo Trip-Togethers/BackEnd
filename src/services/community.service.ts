@@ -345,6 +345,7 @@ export class CommunityServices {
               id: comment.id,
               content: comment.content,
               author: {
+                id: comment.userId,
                 nick: author.name,
                 profile: author.profilePicture,
               },
@@ -355,7 +356,7 @@ export class CommunityServices {
               id: comment.id,
               content: comment.content,
               author: {
-                id: comment.user.id,
+                id: comment.userId,
                 nick: "익명", // nickname을 사용할 수 없으면 익명
                 profile: "",
               },
@@ -429,6 +430,7 @@ export class CommunityServices {
           content: savedComment.content,
           createdAt: savedComment.createdAt,
           author: {
+            id: savedComment.userId,
             nick: savedComment.nickname || "익명", // 사용자의 닉네임 추가
             profile: user.profilePicture || "", // 사용자 프로필 이미지 추가 (없을 경우 빈 문자열)
           },
