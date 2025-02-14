@@ -355,6 +355,7 @@ export class CommunityServices {
               id: comment.id,
               content: comment.content,
               author: {
+                id: comment.user.id,
                 nick: "익명", // nickname을 사용할 수 없으면 익명
                 profile: "",
               },
