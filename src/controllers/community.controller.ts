@@ -188,7 +188,7 @@ export const addCommentToPost = async (req: Request, res: Response) => {
   }
 
   const userId = req.user?.userId;
-
+  console.log("로그인한 사용자 아이디", userId)
   if (!userId) {
     return res
       .status(StatusCodes.BAD_REQUEST)

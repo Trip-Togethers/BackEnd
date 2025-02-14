@@ -411,10 +411,10 @@ export class CommunityServices {
           statusCode: StatusCodes.NOT_FOUND,
         };
       }
-
+      
       const newCommentst = new Comments();
       newCommentst.postId = postId;
-      newCommentst.userId = userId;
+      newCommentst.userId = user.id;
       newCommentst.content = comment;
       newCommentst.nickname = user.nickname; // nickname 저장
 
