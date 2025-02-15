@@ -16,3 +16,5 @@ trip-together-ec2-key.ppk
 
 /dist
 index.js
+
+trip-key.pem

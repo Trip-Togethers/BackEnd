@@ -39,32 +39,36 @@ export class Posts {
     userId: number;
 }
 
-@Entity('comments')
+@Entity("comments")
 export class Comments {
-    @PrimaryGeneratedColumn({ unsigned: true })
-    id: number;
+  @PrimaryGeneratedColumn({ unsigned: true })
+  id: number;
 
-    @ManyToOne(() => Posts, (post) => post.id, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'post_id' })
-    postId!: number;
+  // 게시글 ID 외래 키 (postId 컬럼을 사용하여 저장)
+  @Column()
+  postId!: number;
 
-    @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
-    user: User
+  @ManyToOne(() => Posts, (post) => post.id, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "post_id" })
+  post: Posts;
 
-    @Column()
-    userId!: number;
+  @ManyToOne(() => User, (user) => user.id, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "user_id" })
+  user: User;
 
-    @Column({ type: 'text', charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' })
-    content: string;
+  @Column()
+  userId!: number;
 
-    @CreateDateColumn({ type: 'datetime' })
-    createdAt: Date;
+  @Column({ type: "text", charset: "utf8mb4", collation: "utf8mb4_unicode_ci" })
+  content: string;
 
-    @UpdateDateColumn({ type: 'datetime', nullable: true })
-    updatedAt: Date | null;
+  @CreateDateColumn({ type: "datetime" })
+  createdAt: Date;
 
-    // nickname 필드를 추가
+  @UpdateDateColumn({ type: "datetime", nullable: true })
+  updatedAt: Date | null;
+
+  // nickname 필드를 추가
   @Column({ nullable: true })
   nickname?: string;
 }

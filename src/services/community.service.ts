@@ -247,11 +247,12 @@ export class CommunityServices {
         };
       }
 
-      // S3 이미지 삭제
-      const fileName = post.postPhotoUrl.split("/").pop(); // URL에서 파일 이름 추출
-      if (fileName) {
-        await deleteFileFromS3(fileName); // S3에서 파일 삭제
-      }
+      // 서버 연결시 주석 풀어야함
+      // // S3 이미지 삭제
+      // const fileName = post.postPhotoUrl.split("/").pop(); // URL에서 파일 이름 추출
+      // if (fileName) {
+      //   await deleteFileFromS3(fileName); // S3에서 파일 삭제
+      // }
 
       await postRepository.delete({ id: postId });
 
@@ -325,78 +326,86 @@ export class CommunityServices {
   static async getCommentsForPost(postId: number) {
     try {
       const commentRepository = AppDataSource.getRepository(Comments);
-
+  
+      // postId를 기준으로 댓글을 가져오기
       const comments = await commentRepository.find({
-        relations: ["user"],
         where: { postId: postId },
+        relations: ["user"],
       });
-      console.log("가져온 댓글 데이터:", comments);
-
-      const results = await Promise.all(
-        comments.map(async (comment) => {
-          try {
-            // 작성자 정보 가져오기
-            const author = {
-              name: comment?.nickname || "익명", // nickname을 바로 사용
-              profilePicture: comment?.user?.profilePicture || "", // 프로필 사진
-            };
-
-            return {
-              id: comment.id,
-              content: comment.content,
-              author: {
-                id: comment.userId,
-                nick: author.name,
-                profile: author.profilePicture,
-              },
-              createdAt: comment.createdAt,
-            };
-          } catch (error) {
-            return {
-              id: comment.id,
-              content: comment.content,
-              author: {
-                id: comment.userId,
-                nick: "익명", // nickname을 사용할 수 없으면 익명
-                profile: "",
-              },
-              createdAt: comment.createdAt,
-            };
-          }
-        })
-      );
-
+  
+      // 가져온 댓글 목록 로깅
+      console.log("현재 게시글 ID:", postId);
+      console.log("가져온 댓글 목록:", comments);
+  
+      // 댓글 데이터를 처리하는 부분
+      const results = comments.map((comment) => {
+        try {
+          // 작성자 정보 가져오기
+          const author = {
+            name: comment?.nickname || "익명",  // nickname을 바로 사용
+            profilePicture: comment?.user?.profilePicture || "", // 프로필 사진
+          };
+  
+          return {
+            id: comment.id,
+            content: comment.content,
+            author: {
+              id: comment.userId,
+              nick: author.name,
+              profile: author.profilePicture,
+            },
+            createdAt: comment.createdAt,
+          };
+        } catch (error) {
+          // 에러 발생 시 기본값 반환
+          console.error("댓글 작성자 정보 처리 중 오류:", error);
+          return {
+            id: comment.id,
+            content: comment.content,
+            author: {
+              id: comment.userId,
+              nick: "익명",  // nickname을 사용할 수 없으면 익명
+              profile: "",
+            },
+            createdAt: comment.createdAt,
+          };
+        }
+      });
+  
+      // 최종 댓글 데이터 로깅
+      console.log("가져온 댓글 데이터:", results);
+  
+      // 댓글 데이터 반환
       return {
         message: "댓글 불러오기 완료",
         statusCode: StatusCodes.OK,
         posts: results,
       };
     } catch (error) {
+      console.error("댓글 불러오기 중 오류가 발생:", error);
       return {
         message: "댓글 불러오기 중 오류가 발생했습니다.",
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       };
     }
   }
+  
+  
 
-  static async addCommentToPost(
-    postId: number,
-    userId: number,
-    comment: string
-  ) {
+  static async addCommentToPost(postId: number, userId: number, comment: string) {
     const postRepository = AppDataSource.getRepository(Posts);
     const commentRepository = AppDataSource.getRepository(Comments);
     const userRepository = AppDataSource.getRepository(User);
     try {
       const post = await postRepository.findOne({ where: { id: postId } });
-
+  
       if (!post) {
         return {
           message: "게시글을 찾을 수 없습니다.",
           statusCode: StatusCodes.NOT_FOUND,
         };
       }
-
+  
       // 로그인한 사용자가 댓글을 달 수 있는지 확인
       if (!userId) {
         return {
@@ -404,7 +413,7 @@ export class CommunityServices {
           statusCode: StatusCodes.FORBIDDEN,
         };
       }
-
+  
       // 사용자의 닉네임 조회
       const user = await userRepository.findOne({ where: { id: userId } });
       if (!user) {
@@ -413,16 +422,16 @@ export class CommunityServices {
           statusCode: StatusCodes.NOT_FOUND,
         };
       }
-      
-      const newCommentst = new Comments();
-      newCommentst.user = user;
-      newCommentst.postId = postId;
-      newCommentst.userId = user.id;
-      newCommentst.content = comment;
-      newCommentst.nickname = user.nickname; // nickname 저장
-
-      const savedComment = await commentRepository.save(newCommentst);
-
+  
+      const newComment = new Comments();
+      newComment.user = user;
+      newComment.postId = postId;
+      newComment.userId = user.id;
+      newComment.content = comment;
+      newComment.nickname = user.nickname || "익명"; // nickname 저장
+  
+      const savedComment = await commentRepository.save(newComment);
+  
       return {
         message: "댓글 작성 완료",
         statusCode: StatusCodes.OK,
@@ -443,23 +452,24 @@ export class CommunityServices {
       };
     }
   }
+  
 
   static async updateComment(commentId: number, userId: number, comment: string) {
     const commentRepository = AppDataSource.getRepository(Comments);
-
+  
     try {
       // 해당 댓글을 먼저 조회하여 작성자 ID 확인
       const existingComment = await commentRepository.findOne({
         where: { id: commentId },
       });
-
+  
       if (!existingComment) {
         return {
           message: "수정할 댓글이 존재하지 않습니다.",
           statusCode: StatusCodes.NOT_FOUND,
         };
       }
-
+  
       // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
       if (existingComment.userId !== userId) {
         return {
@@ -467,15 +477,10 @@ export class CommunityServices {
           statusCode: StatusCodes.FORBIDDEN,
         };
       }
-
+  
       // 댓글 내용 수정
       await commentRepository.update(commentId, { content: comment });
-
-      // // 수정된 댓글 정보 반환
-      // const updatedComment = await commentRepository.findOne({
-      //   where: { id: commentId },
-      // });
-
+  
       return {
         message: "댓글 수정 완료",
         statusCode: StatusCodes.OK,
@@ -492,34 +497,23 @@ export class CommunityServices {
       };
     }
   }
+  
 
-  static async deleteComment(commentId: number,postId: number, userId: number) {
+  static async deleteComment(commentId: number, postId: number, userId: number) {
     const commentRepository = AppDataSource.getRepository(Comments);
-
+  
     try {
-      const userRepository = AppDataSource.getRepository(User);
-      const user = await userRepository.findOne({
-        where: { id: userId },
-      });
-
-      if (!user) {
-        return {
-          message: "사용자를 찾을 수 없습니다.",
-          statusCode: StatusCodes.NOT_FOUND,
-        };
-      }
-
-      // 해당 댓글을 먼저 조회하여 작성자 ID 확인
       const existingComment = await commentRepository.findOne({
-        where: { userId: userId },
+        where: { id: commentId, postId: postId },
       });
-
+  
       if (!existingComment) {
         return {
-          message: "수정할 댓글이 존재하지 않습니다.",
+          message: "삭제할 댓글이 존재하지 않습니다.",
           statusCode: StatusCodes.NOT_FOUND,
         };
       }
+  
       // 댓글 작성자 ID가 로그인한 사용자 ID와 일치하는지 확인
       if (existingComment.userId !== userId) {
         return {
@@ -527,14 +521,15 @@ export class CommunityServices {
           statusCode: StatusCodes.FORBIDDEN,
         };
       }
-
+  
       await commentRepository.delete({ id: commentId });
-
+  
       return {
         message: "댓글 삭제 완료",
         statusCode: StatusCodes.OK,
         comment: {
-          id: postId,
+          id: commentId,
+          postId: postId, // 삭제한 게시글의 ID
         },
       };
     } catch (error) {
@@ -544,4 +539,5 @@ export class CommunityServices {
       };
     }
   }
+  
 }
