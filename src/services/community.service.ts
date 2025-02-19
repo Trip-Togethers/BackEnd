@@ -372,9 +372,6 @@ export class CommunityServices {
         }
       });
   
-      // 최종 댓글 데이터 로깅
-      console.log("가져온 댓글 데이터:", results);
-  
       // 댓글 데이터 반환
       return {
         message: "댓글 불러오기 완료",
