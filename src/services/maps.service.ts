@@ -34,6 +34,7 @@ export class calendarServices {
     
             // 엔티티에 맞는 데이터 포맷으로 변환
             const mapData = {
+                place_id: params.place_id,
                 name: params.name,
                 latitude: params.latitude,
                 longitude: params.longitude,
