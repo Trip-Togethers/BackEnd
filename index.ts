@@ -23,7 +23,7 @@ const app = express();
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: ["http://localhost:5173"], // 허용할 프론트엔드 도메인
+  origin: ["http://localhost:5173", "http://trip-together.store"], // 허용할 프론트엔드 도메인
   credentials: true,               // 쿠키 허용
 };
 
